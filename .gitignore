@@ -216,3 +216,11 @@ media/
 
 # Logs locales de desarrollo
 *.log
+
+# PyCharm IDE
+*.iml
+.idea/
+misc.xml
+modules.xml
+profile_settings.xml
+vcs.xml
