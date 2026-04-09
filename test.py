@@ -1,5 +1,4 @@
-from db.db_manager import crear_profesor, obtener_profesores, crear_horario, obtener_horarios, registrar_entrada, obtener_presencia
-
+from db.db_manager import crear_profesor, obtener_profesores, crear_horario, obtener_horarios, registrar_entrada, obtener_presencia, obtener_ausentes, borrar_presencia
 #Para probar diferentes funciones de la db sqlite
 '''
 crear_profesor("Yago Ares Armesto")
@@ -16,9 +15,8 @@ print(obtener_horarios())
 
 '''
 
-'''
 registrar_entrada(1, "2026-04-09", "08:00")
-registrar_entrada(2, "2026-04-09", "08:05")
-'''
+#registrar_entrada(2, "2026-04-09", "08:05")
 
 print(obtener_presencia())
+print(obtener_ausentes("Lunes", "2026-04-09"))

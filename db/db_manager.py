@@ -84,3 +84,41 @@ def obtener_presencia():
 
     conn.close()
     return datos
+
+
+#Obtener ausentes
+
+def obtener_ausentes(dia, fecha):
+    conn = get_connection()
+    cursor = conn.cursor()
+
+    # Profesores que deberían estar ese día
+    cursor.execute(
+        "SELECT DISTINCT profesor_id FROM horarios WHERE dia = ?",
+        (dia,)
+    )
+    profesores_horario = {row[0] for row in cursor.fetchall()}
+
+    # Profesores que han fichado ese día
+    cursor.execute(
+        "SELECT DISTINCT profesor_id FROM presencia WHERE fecha = ?",
+        (fecha,)
+    )
+    profesores_presentes = {row[0] for row in cursor.fetchall()}
+
+    conn.close()
+
+    # Diferencia
+    ausentes = profesores_horario - profesores_presentes
+
+    return ausentes
+
+#Temporal, para limpiar
+def borrar_presencia():
+    conn = get_connection()
+    cursor = conn.cursor()
+
+    cursor.execute("DELETE FROM presencia")
+
+    conn.commit()
+    conn.close()
