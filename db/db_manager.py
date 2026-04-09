@@ -58,3 +58,29 @@ def obtener_horarios():
 
     conn.close()
     return horarios
+
+#Entrada
+
+def registrar_entrada(profesor_id, fecha, hora_entrada):
+    conn = get_connection()
+    cursor = conn.cursor()
+
+    cursor.execute(
+        "INSERT INTO presencia (profesor_id, fecha, hora_entrada) VALUES (?, ?, ?)",
+        (profesor_id, fecha, hora_entrada)
+    )
+
+    conn.commit()
+    conn.close()
+
+#Ver presencia
+
+def obtener_presencia():
+    conn = get_connection()
+    cursor = conn.cursor()
+
+    cursor.execute("SELECT * FROM presencia")
+    datos = cursor.fetchall()
+
+    conn.close()
+    return datos
