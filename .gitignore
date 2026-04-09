@@ -211,7 +211,6 @@ database/*.db
 database/*.sqlite3
 
 # Archivos estáticos generados (opcional, si quieres subir solo CSS/JS fuente)
-static/
 media/
 
 # Logs locales de desarrollo
