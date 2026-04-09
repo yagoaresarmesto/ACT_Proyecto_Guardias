@@ -1,5 +1,4 @@
 import sqlite3
-from wsgiref.util import request_uri
 
 DB_PATH = "ies.db"
 
@@ -7,9 +6,7 @@ DB_PATH = "ies.db"
 def get_connection():
     return sqlite3.connect(DB_PATH)
 
-
 #Profesores
-
 #Crear profesor (test)
 def crear_profesor(nombre):
     conn = get_connection()
@@ -112,13 +109,3 @@ def obtener_ausentes(dia, fecha):
     ausentes = profesores_horario - profesores_presentes
 
     return ausentes
-
-#Temporal, para limpiar
-def borrar_presencia():
-    conn = get_connection()
-    cursor = conn.cursor()
-
-    cursor.execute("DELETE FROM presencia")
-
-    conn.commit()
-    conn.close()
