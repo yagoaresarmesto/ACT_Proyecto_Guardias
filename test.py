@@ -8,7 +8,8 @@ from db.db_manager import (
 
 from modules.guardias.motor import (
     obtener_aulas_sin_profesor,
-    obtener_profesores_disponibles
+    obtener_profesores_disponibles,
+    asignar_guardias
 )
 
 from modules.guardias.reglas import ordenar_por_guardias
@@ -40,7 +41,6 @@ def test_horarios():
 def test_presencia():
         # Profesor 1 presente
         registrar_entrada(1, "2026-04-09", "08:00")
-
         # Profesor 3 presente
         registrar_entrada(3, "2026-04-09", "08:05")
 
@@ -69,6 +69,12 @@ def test_reglas():
     print(ordenar_por_guardias(disponibles))
 
 
+
+def test_asignacion():
+    resultado = asignar_guardias("Lunes", "2026-04-09")
+    print(resultado)
+
+
 def test_limpiar_bd():
     from db.db_manager import limpiar_bd_completa
 
@@ -76,7 +82,7 @@ def test_limpiar_bd():
     print("Base de datos limpiada")
 
 if __name__ == "__main__":
-    # test_limpiar_bd()
+    test_limpiar_bd()
     test_profesores()
     test_horarios()
     test_presencia()
@@ -85,4 +91,5 @@ if __name__ == "__main__":
     # test_aulas()
     # test_disponibles()
 
-    test_reglas()
+    #test_reglas()
+    test_asignacion()
