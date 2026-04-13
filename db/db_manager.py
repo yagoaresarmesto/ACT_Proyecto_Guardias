@@ -109,3 +109,18 @@ def obtener_ausentes(dia, fecha):
     ausentes = profesores_horario - profesores_presentes
 
     return ausentes
+
+
+#Borrar base de datos
+def limpiar_bd_completa():
+    conn = get_connection()
+    cursor = conn.cursor()
+
+    cursor.execute("DELETE FROM presencia")
+    cursor.execute("DELETE FROM horarios")
+    cursor.execute("DELETE FROM profesores")
+
+    cursor.execute("DELETE FROM sqlite_sequence")
+
+    conn.commit()
+    conn.close()

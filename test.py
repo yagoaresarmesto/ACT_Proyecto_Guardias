@@ -17,21 +17,34 @@ from modules.guardias.reglas import ordenar_por_guardias
 # PRUEBAS DB
 
 def test_profesores():
-    crear_profesor("Yago Ares Armesto")
-    crear_profesor("Jesus Ares Armesto")
+    crear_profesor("Profesor 1")
+    crear_profesor("Profesor 2")
+    crear_profesor("Profesor 3")
+
     print(obtener_profesores())
 
 
 def test_horarios():
-    crear_horario(1, "Lunes", 1, "Aula 238")
-    crear_horario(4, "Lunes", 2, "Aula 239")
+    # Profesor 1 → hora 1
+    crear_horario(1, "Lunes", 1, "Aula 101")
+
+    # Profesor 2 → hora 2 (este faltará)
+    crear_horario(2, "Lunes", 2, "Aula 102")
+
+    # Profesor 3 → hora 2 (ocupado)
+    crear_horario(3, "Lunes", 2, "Aula 103")
+
     print(obtener_horarios())
 
 
 def test_presencia():
-    registrar_entrada(1, "2026-04-09", "08:00")
-    registrar_entrada(2, "2026-04-09", "08:05")
-    print(obtener_presencia())
+        # Profesor 1 presente
+        registrar_entrada(1, "2026-04-09", "08:00")
+
+        # Profesor 3 presente
+        registrar_entrada(3, "2026-04-09", "08:05")
+
+        print(obtener_presencia())
 
 
 def test_ausencias():
@@ -56,12 +69,17 @@ def test_reglas():
     print(ordenar_por_guardias(disponibles))
 
 
-if __name__ == "__main__":
-    # Activa SOLO lo que quieras probar:
+def test_limpiar_bd():
+    from db.db_manager import limpiar_bd_completa
 
-    # test_profesores()
-    # test_horarios()
-    # test_presencia()
+    limpiar_bd_completa()
+    print("Base de datos limpiada")
+
+if __name__ == "__main__":
+    # test_limpiar_bd()
+    test_profesores()
+    test_horarios()
+    test_presencia()
     # test_ausencias()
 
     # test_aulas()
