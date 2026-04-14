@@ -1,36 +1,31 @@
-<!DOCTYPE html>
-<html>
-<head>
-    <title>Guardias</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='estilos.css') }}">
-</head>
-<body>
+{% extends "base.html" %}
 
-<div class="container">
-    <h1>Guardias asignadas</h1>
+{% block title %}Guardias{% endblock %}
 
-    <table>
-        <tr>
-            <th>Aula</th>
-            <th>Hora</th>
-            <th>Profesor</th>
-        </tr>
+{% block content %}
 
-        {% for aula, hora, profesor in guardias %}
-        <tr>
-            <td>{{ aula }}</td>
-            <td>{{ hora }}</td>
-            <td>
-                {% if profesor %}
-                    {{ profesor[1] }}
-                {% else %}
-                    <span class="sin-profesor">Sin asignar</span>
-                {% endif %}
-            </td>
-        </tr>
-        {% endfor %}
-    </table>
-</div>
+<h1>Guardias asignadas</h1>
 
-</body>
-</html>
+<table>
+    <tr>
+        <th>Aula</th>
+        <th>Hora</th>
+        <th>Profesor</th>
+    </tr>
+
+    {% for aula, hora, profesor in guardias %}
+    <tr>
+        <td>{{ aula }}</td>
+        <td>{{ hora }}</td>
+        <td>
+            {% if profesor %}
+                {{ profesor[1] }}
+            {% else %}
+                <span class="sin-profesor">Sin asignar</span>
+            {% endif %}
+        </td>
+    </tr>
+    {% endfor %}
+</table>
+
+{% endblock %}
