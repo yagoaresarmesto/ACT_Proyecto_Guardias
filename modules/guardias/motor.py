@@ -41,9 +41,12 @@ def asignar_guardias(dia, fecha):
     aulas = obtener_aulas_sin_profesor(dia, fecha)
 
     resultado = []
+    profesores_usados = set()
 
     for aula, hora in aulas:
         disponibles = obtener_profesores_disponibles(dia, hora, fecha)
+
+        disponibles = disponibles - profesores_usados
 
         if not disponibles:
             resultado.append((aula, hora, None))
@@ -54,5 +57,7 @@ def asignar_guardias(dia, fecha):
         profesor_asignado = ranking[0]
 
         resultado.append((aula, hora, profesor_asignado))
+
+        profesores_usados.add(profesor_asignado[0])
 
     return resultado

@@ -1,11 +1,33 @@
-<!doctype html>
+<!DOCTYPE html>
 <html>
 <head>
     <title>Guardias</title>
 </head>
 <body>
-    <h1>Vista de Guardias</h1>
-    <p>Aquí se mostrará la tabla de guardias y profesores asignados.</p>
-    <a href="/">Volver al inicio</a>
+
+<h1>Guardias asignadas</h1>
+
+<table border="1">
+    <tr>
+        <th>Aula</th>
+        <th>Hora</th>
+        <th>Profesor</th>
+    </tr>
+
+    {% for aula, hora, profesor in guardias %}
+    <tr>
+        <td>{{ aula }}</td>
+        <td>{{ hora }}</td>
+        <td>
+            {% if profesor %}
+                {{ profesor[1] }}
+            {% else %}
+                Pendiente de asignar
+            {% endif %}
+        </td>
+    </tr>
+    {% endfor %}
+</table>
+
 </body>
 </html>

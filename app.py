@@ -1,4 +1,5 @@
 from flask import Flask, render_template
+from modules.guardias.motor import asignar_guardias
 
 app = Flask(__name__)
 
@@ -8,7 +9,9 @@ def index():
 
 @app.route('/guardias')
 def vista_guardias():
-    return render_template('vista_guardias.html')
+
+    guardias = asignar_guardias("Lunes", "2026-04-09")
+    return render_template('vista_guardias.html', guardias=guardias)
 
 @app.route('/presencia')
 def vista_presencia():

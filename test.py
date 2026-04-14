@@ -21,30 +21,33 @@ def test_profesores():
     crear_profesor("Profesor 1")
     crear_profesor("Profesor 2")
     crear_profesor("Profesor 3")
+    crear_profesor("Profesor 4")
+    crear_profesor("Profesor 5")
 
     print(obtener_profesores())
 
 
 def test_horarios():
-    # Profesor 1 → hora 1
     crear_horario(1, "Lunes", 1, "Aula 101")
+    crear_horario(2, "Lunes", 1, "Aula 102")
 
-    # Profesor 2 → hora 2 (este faltará)
-    crear_horario(2, "Lunes", 2, "Aula 102")
-
-    # Profesor 3 → hora 2 (ocupado)
     crear_horario(3, "Lunes", 2, "Aula 103")
+    crear_horario(4, "Lunes", 2, "Aula 104")
+
+    crear_horario(5, "Lunes", 3, "Aula 105")
 
     print(obtener_horarios())
 
 
 def test_presencia():
-        # Profesor 1 presente
-        registrar_entrada(1, "2026-04-09", "08:00")
-        # Profesor 3 presente
-        registrar_entrada(3, "2026-04-09", "08:05")
+    # Presentes
+    registrar_entrada(1, "2026-04-09", "08:00")
+    registrar_entrada(3, "2026-04-09", "08:05")
+    # registrar_entrada(5, "2026-04-09", "08:10")
 
-        print(obtener_presencia())
+    # Ausentes → 2 y 4
+
+    print(obtener_presencia())
 
 
 def test_ausencias():
@@ -88,7 +91,7 @@ if __name__ == "__main__":
     test_presencia()
     # test_ausencias()
 
-    # test_aulas()
+    #test_aulas()
     # test_disponibles()
 
     #test_reglas()
