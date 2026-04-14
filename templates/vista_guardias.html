@@ -2,32 +2,35 @@
 <html>
 <head>
     <title>Guardias</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='estilos.css') }}">
 </head>
 <body>
 
-<h1>Guardias asignadas</h1>
+<div class="container">
+    <h1>Guardias asignadas</h1>
 
-<table border="1">
-    <tr>
-        <th>Aula</th>
-        <th>Hora</th>
-        <th>Profesor</th>
-    </tr>
+    <table>
+        <tr>
+            <th>Aula</th>
+            <th>Hora</th>
+            <th>Profesor</th>
+        </tr>
 
-    {% for aula, hora, profesor in guardias %}
-    <tr>
-        <td>{{ aula }}</td>
-        <td>{{ hora }}</td>
-        <td>
-            {% if profesor %}
-                {{ profesor[1] }}
-            {% else %}
-                Pendiente de asignar
-            {% endif %}
-        </td>
-    </tr>
-    {% endfor %}
-</table>
+        {% for aula, hora, profesor in guardias %}
+        <tr>
+            <td>{{ aula }}</td>
+            <td>{{ hora }}</td>
+            <td>
+                {% if profesor %}
+                    {{ profesor[1] }}
+                {% else %}
+                    <span class="sin-profesor">Sin asignar</span>
+                {% endif %}
+            </td>
+        </tr>
+        {% endfor %}
+    </table>
+</div>
 
 </body>
 </html>
