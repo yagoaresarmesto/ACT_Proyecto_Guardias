@@ -1,4 +1,4 @@
-from db.db_manager import obtener_horarios, obtener_presencia
+from db.db_manager import obtener_horarios, obtener_presencia, obtener_guardia, obtener_profesor_por_id
 from modules.guardias.reglas import ordenar_por_guardias
 
 def obtener_aulas_sin_profesor(dia, fecha):
@@ -59,5 +59,38 @@ def asignar_guardias(dia, fecha):
         resultado.append((aula, hora, profesor_asignado))
 
         profesores_usados.add(profesor_asignado[0])
+
+    return resultado
+
+def obtener_guardias_para_vista(dia, fecha):
+    aulas = obtener_aulas_sin_profesor(dia, fecha)
+
+    resultado = []
+
+    for aula, hora in aulas:
+        guardia = obtener_guardia(aula, hora, fecha)
+
+        #YA ASIGNADA
+        if guardia:
+            profesor = obtener_profesor_por_id(guardia)
+
+            resultado.append({
+                "aula": aula,
+                "hora": hora,
+                "asignada": True,
+                "profesor": profesor
+            })
+
+        #PENDIENTE
+        else:
+            disponibles = obtener_profesores_disponibles(dia, hora, fecha)
+            ranking = ordenar_por_guardias(disponibles)
+
+            resultado.append({
+                "aula": aula,
+                "hora": hora,
+                "asignada": False,
+                "profesores": ranking
+            })
 
     return resultado

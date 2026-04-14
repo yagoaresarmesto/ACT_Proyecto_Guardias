@@ -1,6 +1,8 @@
 import sqlite3
+import os
 
-DB_PATH = "ies.db"
+BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+DB_PATH = os.path.join(BASE_DIR, "ies.db")
 
 #Abre conexión con la base de datos
 def get_connection():
@@ -29,6 +31,20 @@ def obtener_profesores():
 
     conn.close()
     return profesores
+
+def obtener_profesor_por_id(profesor_id):
+    conn = get_connection()
+    cursor = conn.cursor()
+
+    cursor.execute(
+        "SELECT * FROM profesores WHERE id = ?",
+        (profesor_id,)
+    )
+
+    profesor = cursor.fetchone()
+
+    conn.close()
+    return profesor
 
 #Horarios
 
@@ -110,12 +126,54 @@ def obtener_ausentes(dia, fecha):
 
     return ausentes
 
+def obtener_guardia(aula, hora, fecha):
+    conn = get_connection()
+    cursor = conn.cursor()
+
+    cursor.execute("""
+        SELECT profesor_id FROM guardias
+        WHERE aula = ? AND hora = ? AND fecha = ?
+    """, (aula, hora, fecha))
+
+    resultado = cursor.fetchone()
+
+    conn.close()
+
+    return resultado[0] if resultado else None
+
+def sumar_guardia(profesor_id):
+    conn = get_connection()
+    cursor = conn.cursor()
+
+    cursor.execute("""
+        UPDATE profesores
+        SET guardias_acumuladas = guardias_acumuladas + 1,
+            guardias_semana = guardias_semana + 1
+        WHERE id = ?
+    """, (profesor_id,))
+
+    conn.commit()
+    conn.close()
+
+def guardar_guardia(aula, hora, fecha, profesor_id):
+    conn = get_connection()
+    cursor = conn.cursor()
+
+    cursor.execute("""
+        INSERT INTO guardias (profesor_id, aula, hora, fecha)
+        VALUES (?, ?, ?, ?)
+    """, (profesor_id, aula, hora, fecha))
+
+    conn.commit()
+    conn.close()
+
 
 #Borrar base de datos
 def limpiar_bd_completa():
     conn = get_connection()
     cursor = conn.cursor()
 
+    cursor.execute("DELETE FROM guardias")   # 🔥 FALTABA
     cursor.execute("DELETE FROM presencia")
     cursor.execute("DELETE FROM horarios")
     cursor.execute("DELETE FROM profesores")

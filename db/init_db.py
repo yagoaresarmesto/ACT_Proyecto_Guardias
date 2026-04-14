@@ -1,14 +1,19 @@
 import sqlite3
-#Crea la base de datos de sqlLite
+import os
 
 def init_db():
-    conn = sqlite3.connect("ies.db")
+    BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
-    with open("db/schema.sql", "r") as f:
-        schema = f.read()
-    conn.executescript(schema)
+    db_path = os.path.join(BASE_DIR, "ies.db")
+    schema_path = os.path.join(BASE_DIR, "db", "schema.sql")
+
+    conn = sqlite3.connect(db_path)
+
+    with open(schema_path, "r") as f:
+        conn.executescript(f.read())
+
     conn.close()
-    print("Base de datos creada")
+    print("Base de datos creada correctamente en:", db_path)
 
 
 if __name__ == "__main__":

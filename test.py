@@ -1,15 +1,16 @@
-# IMPORTS
 from db.db_manager import (
     crear_profesor, obtener_profesores,
     crear_horario, obtener_horarios,
     registrar_entrada, obtener_presencia,
-    obtener_ausentes
+    obtener_ausentes,
+    guardar_guardia,
+    limpiar_bd_completa
 )
 
 from modules.guardias.motor import (
     obtener_aulas_sin_profesor,
     obtener_profesores_disponibles,
-    asignar_guardias
+    obtener_guardias_para_vista
 )
 
 from modules.guardias.reglas import ordenar_por_guardias
@@ -24,6 +25,7 @@ def test_profesores():
     crear_profesor("Profesor 4")
     crear_profesor("Profesor 5")
 
+    print("Profesores:")
     print(obtener_profesores())
 
 
@@ -36,6 +38,7 @@ def test_horarios():
 
     crear_horario(5, "Lunes", 3, "Aula 105")
 
+    print("Horarios:")
     print(obtener_horarios())
 
 
@@ -43,56 +46,69 @@ def test_presencia():
     # Presentes
     registrar_entrada(1, "2026-04-09", "08:00")
     registrar_entrada(3, "2026-04-09", "08:05")
-    # registrar_entrada(5, "2026-04-09", "08:10")
 
-    # Ausentes → 2 y 4
-
+    print("Presencia:")
     print(obtener_presencia())
 
 
 def test_ausencias():
+    print("Ausentes:")
     print(obtener_ausentes("Lunes", "2026-04-09"))
 
 
 # MOTOR
 
 def test_aulas():
+    print("Aulas sin profesor:")
     print(obtener_aulas_sin_profesor("Lunes", "2026-04-09"))
 
 
 def test_disponibles():
+    print("Profesores disponibles:")
     print(obtener_profesores_disponibles("Lunes", 2, "2026-04-09"))
 
 
 # REGLAS
 
-
 def test_reglas():
     disponibles = obtener_profesores_disponibles("Lunes", 2, "2026-04-09")
+    print("Ranking:")
     print(ordenar_por_guardias(disponibles))
 
 
+#GUARDIAS
 
-def test_asignacion():
-    resultado = asignar_guardias("Lunes", "2026-04-09")
-    print(resultado)
+def test_guardias_asignadas():
+    # Simular que ya se asignó una guardia
+    guardar_guardia("Aula 102", 1, "2026-04-09", 1)
+
+    print("Guardia asignada manualmente")
+
+
+def test_vista():
+    print("Vista final:")
+    resultado = obtener_guardias_para_vista("Lunes", "2026-04-09")
+    for r in resultado:
+        print(r)
+
+
+
+# LIMPIEZA
 
 
 def test_limpiar_bd():
-    from db.db_manager import limpiar_bd_completa
-
     limpiar_bd_completa()
     print("Base de datos limpiada")
 
+
+
 if __name__ == "__main__":
     test_limpiar_bd()
+
     test_profesores()
     test_horarios()
     test_presencia()
-    # test_ausencias()
 
-    #test_aulas()
-    # test_disponibles()
+    test_guardias_asignadas()
 
-    #test_reglas()
-    test_asignacion()
+    test_vista()

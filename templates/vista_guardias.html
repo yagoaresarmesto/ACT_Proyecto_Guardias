@@ -1,31 +1,64 @@
 {% extends "base.html" %}
 
-{% block title %}Guardias{% endblock %}
-
 {% block content %}
 
-<h1>Guardias asignadas</h1>
+<div class="container">
 
-<table>
-    <tr>
-        <th>Aula</th>
-        <th>Hora</th>
-        <th>Profesor</th>
-    </tr>
+    <h1>Asignación de guardias</h1>
 
-    {% for aula, hora, profesor in guardias %}
-    <tr>
-        <td>{{ aula }}</td>
-        <td>{{ hora }}</td>
-        <td>
-            {% if profesor %}
-                {{ profesor[1] }}
-            {% else %}
-                <span class="sin-profesor">Sin asignar</span>
-            {% endif %}
-        </td>
-    </tr>
-    {% endfor %}
-</table>
+    <table>
+        <tr>
+            <th>Aula</th>
+            <th>Hora</th>
+            <th>Profesor</th>
+            <th>Acción</th>
+        </tr>
+
+        {% for g in guardias %}
+
+        {% if g.asignada %}
+
+        <tr>
+            <td>{{ g.aula }}</td>
+            <td>{{ g.hora }}</td>
+            <td class="asignado">✔️ {{ g.profesor[1] }}</td>
+            <td>✔️</td>
+        </tr>
+
+        {% else %}
+
+        <form method="POST" action="/asignar_guardia">
+        <tr>
+            <td>{{ g.aula }}</td>
+            <td>{{ g.hora }}</td>
+
+            <td>
+                <select name="profesor_id">
+                    <option value="">-- Seleccionar profesor --</option>
+
+                    {% for p in g.profesores %}
+                        <option value="{{ p[0] }}">{{ p[1] }}</option>
+                    {% endfor %}
+                </select>
+            </td>
+
+            <td>
+                <input type="hidden" name="aula" value="{{ g.aula }}">
+                <input type="hidden" name="hora" value="{{ g.hora }}">
+
+                <button class="btn-asignar" type="submit">
+                    Asignar
+                </button>
+            </td>
+        </tr>
+        </form>
+
+        {% endif %}
+
+        {% endfor %}
+
+    </table>
+
+</div>
 
 {% endblock %}
