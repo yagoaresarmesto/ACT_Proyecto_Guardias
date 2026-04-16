@@ -1,11 +1,26 @@
-<!doctype html>
-<html>
-<head>
-    <title>Guardias</title>
-</head>
-<body>
-    <h1>Vista de Guardias</h1>
-    <p>Aquí se mostrará la tabla de guardias y profesores asignados.</p>
-    <a href="/">Volver al inicio</a>
-</body>
-</html>
+{% extends "base.html" %}
+
+{% block content %}
+
+<div class="container">
+
+    <h1>Control de presencia</h1>
+
+    <div class="botonera">
+
+   {% for p in profesores %}
+<form method="POST">
+    <input type="hidden" name="profesor_id" value="{{ p[0] }}">
+
+    <button class="btn-profesor
+        {% if p[0] in presentes %}presente{% endif %}">
+        {{ p[1] }}
+    </button>
+</form>
+{% endfor %}
+
+    </div>
+
+</div>
+
+{% endblock %}

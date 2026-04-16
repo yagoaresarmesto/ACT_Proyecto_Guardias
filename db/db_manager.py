@@ -82,7 +82,7 @@ def registrar_entrada(profesor_id, fecha, hora_entrada):
         "INSERT INTO presencia (profesor_id, fecha, hora_entrada) VALUES (?, ?, ?)",
         (profesor_id, fecha, hora_entrada)
     )
-
+    print("Registrando entrada:", profesor_id)
     conn.commit()
     conn.close()
 

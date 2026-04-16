@@ -11,7 +11,7 @@
             <th>Aula</th>
             <th>Hora</th>
             <th>Profesor</th>
-            <th>Acción</th>
+            <th></th>
         </tr>
 
         {% for g in guardias %}
@@ -21,7 +21,7 @@
         <tr>
             <td>{{ g.aula }}</td>
             <td>{{ g.hora }}</td>
-            <td class="asignado">✔️ {{ g.profesor[1] }}</td>
+            <td class="asignado"> {{ g.profesor[1] }}</td>
             <td>✔️</td>
         </tr>
 
