@@ -7,6 +7,12 @@
     <h1>Control de presencia</h1>
     <p class="fecha">Fecha: {{ fecha }}</p>
 
+    <!-- 🔥 Selector de fecha -->
+    <form method="GET" class="form-fecha">
+        <input type="date" name="fecha" value="{{ fecha }}">
+        <button type="submit">Ver</button>
+    </form>
+
     <div class="botonera">
 
         {% for p in profesores %}
@@ -19,9 +25,9 @@
                 {{ p[1] }}
 
                 {% if p[0] in presentes %}
-                    (presente)
+                    ✔️
                 {% else %}
-                    (ausente)
+                    ❌
                 {% endif %}
 
             </button>

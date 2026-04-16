@@ -166,3 +166,23 @@ td select {
     background-color: #f8d7da;
     border: 1px solid #dc3545;
 }
+
+.form-fecha {
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+.form-fecha input {
+    padding: 6px;
+    border-radius: 5px;
+    border: 1px solid #ccc;
+}
+
+.form-fecha button {
+    padding: 6px 10px;
+    margin-left: 10px;
+    border: none;
+    background-color: #eee;
+    border-radius: 5px;
+    cursor: pointer;
+}
