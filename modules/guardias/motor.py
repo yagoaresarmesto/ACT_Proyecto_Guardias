@@ -36,6 +36,7 @@ def obtener_profesores_disponibles(dia, hora, fecha):
 
     return disponibles
 
+
 #Asignar guardias
 def asignar_guardias(dia, fecha):
     aulas = obtener_aulas_sin_profesor(dia, fecha)
@@ -81,7 +82,6 @@ def obtener_guardias_para_vista(dia, fecha):
                 "profesor": profesor
             })
 
-        #PENDIENTE
         else:
             disponibles = obtener_profesores_disponibles(dia, hora, fecha)
             ranking = ordenar_por_guardias(disponibles)

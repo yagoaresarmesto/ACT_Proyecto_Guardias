@@ -5,19 +5,28 @@
 <div class="container">
 
     <h1>Control de presencia</h1>
+    <p class="fecha">Fecha: {{ fecha }}</p>
 
     <div class="botonera">
 
-   {% for p in profesores %}
-<form method="POST">
-    <input type="hidden" name="profesor_id" value="{{ p[0] }}">
+        {% for p in profesores %}
+        <form method="POST">
+            <input type="hidden" name="profesor_id" value="{{ p[0] }}">
 
-    <button class="btn-profesor
-        {% if p[0] in presentes %}presente{% endif %}">
-        {{ p[1] }}
-    </button>
-</form>
-{% endfor %}
+            <button class="btn-profesor
+                {% if p[0] in presentes %}presente{% else %}ausente{% endif %}">
+
+                {{ p[1] }}
+
+                {% if p[0] in presentes %}
+                    (presente)
+                {% else %}
+                    (ausente)
+                {% endif %}
+
+            </button>
+        </form>
+        {% endfor %}
 
     </div>
 

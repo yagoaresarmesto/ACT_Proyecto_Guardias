@@ -149,7 +149,20 @@ td select {
     background-color: #f5f5f5;
 }
 
+
+.fecha {
+    text-align: center;
+    color: #777;
+    margin-bottom: 20px;
+    font-size: 14px;
+}
+
 .presente {
     background-color: #d4edda;
     border: 1px solid #28a745;
+}
+
+.ausente {
+    background-color: #f8d7da;
+    border: 1px solid #dc3545;
 }
