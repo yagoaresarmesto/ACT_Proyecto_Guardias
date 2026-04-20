@@ -24,5 +24,5 @@ def ordenar_por_guardias(profesores_ids):
         key=lambda p: (p["guardias_acumuladas"], p["id_profesor"])
     )
 
-    # Devolver solo IDs
+    # Devolver solo ID
     return [p["id_profesor"] for p in profesores_ordenados]

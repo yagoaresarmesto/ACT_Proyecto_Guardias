@@ -1,5 +1,4 @@
 import sqlite3
-
 DB_NAME = "ies.db"
 
 def get_connection():

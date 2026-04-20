@@ -1,7 +1,6 @@
 import sqlite3
 import os
 
-
 def init_db():
     MODULES_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))  # .../proyecto_guardias/modules
     PROJECT_ROOT = os.path.dirname(MODULES_DIR)  # .../proyecto_guardias

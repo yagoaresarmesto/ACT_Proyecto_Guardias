@@ -5,11 +5,8 @@ from modules.db.db_manager import (
     obtener_guardias,
     limpiar_bd_completa,sumar_guardia
 )
-
 from modules.guardias.motor import generar_guardias
-
 from modules.guardias.reglas import ordenar_por_guardias
-
 
 def test_profesores():
     crear_profesor("Profesor 1")
