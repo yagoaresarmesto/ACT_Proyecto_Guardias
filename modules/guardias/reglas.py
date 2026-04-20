@@ -1,43 +1,28 @@
-from modules.db.db_manager import obtener_profesores, obtener_horarios
+from modules.db.db_manager import obtener_profesores
 
+def ordenar_por_guardias(profesores_ids):
+    """
+    Ordena profesores por menor número de guardias acumuladas.
+    Desempata por id_profesor para mantener consistencia.
+    """
 
-def ordenar_por_guardias(disponibles):
+    if not profesores_ids:
+        return []
+
     profesores = obtener_profesores()
-    horarios = obtener_horarios()
 
-    carga = {}
-
-    # Calculo de la carga lectiva
-    for h in horarios:
-        profesor_id = h[1]
-        carga[profesor_id] = carga.get(profesor_id, 0) + 1
-
-    # Filtrar solo los disponibles
-    profesores_disponibles = [
-        p for p in profesores if p[0] in disponibles
+    # Filtrar solo los profesores disponibles
+    profesores_filtrados = [
+        p for p in profesores if p["id_profesor"] in profesores_ids
     ]
 
-    # Ordenar por:
-    # 1. guardias acumuladas
-    # 2. guardias semana
-    # 3. carga lectiva
-
+    # Ordenar:
+    # 1. Menos guardias acumuladas
+    # 2. Menor id (desempate estable)
     profesores_ordenados = sorted(
-        profesores_disponibles,
-        key=lambda p: (
-            p[2],                      # guardias acumuladas
-            p[3],                      # guardias semana
-            carga.get(p[0], 0)         # carga lectiva
-        )
+        profesores_filtrados,
+        key=lambda p: (p["guardias_acumuladas"], p["id_profesor"])
     )
 
-    return profesores_ordenados
-
-#Ejemplo de orden:
-
-'''
-(0, 0, 2) → mejor
-(0, 0, 3)
-(0, 1, 1)
-(1, 0, 1) → peor
-'''
+    # Devolver solo IDs
+    return [p["id_profesor"] for p in profesores_ordenados]
