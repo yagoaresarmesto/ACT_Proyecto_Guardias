@@ -1,4 +1,4 @@
-from db.db_manager import obtener_horarios, obtener_presencia, obtener_guardia, obtener_profesor_por_id
+from modules.db.db_manager import obtener_horarios, obtener_presencia, obtener_guardia, obtener_profesor_por_id
 from modules.guardias.reglas import ordenar_por_guardias
 
 def obtener_aulas_sin_profesor(dia, fecha):

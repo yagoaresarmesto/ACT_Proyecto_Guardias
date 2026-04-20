@@ -1,12 +1,17 @@
 import sqlite3
 import os
 
-def init_db():
-    BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-    db_path = os.path.join(BASE_DIR, "ies.db")
-    schema_path = os.path.join(BASE_DIR, "db", "schema.sql")
 
-    #eliminar BD anterior en pruebas
+def init_db():
+    MODULES_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))  # .../proyecto_guardias/modules
+    PROJECT_ROOT = os.path.dirname(MODULES_DIR)  # .../proyecto_guardias
+
+    db_path = os.path.join(PROJECT_ROOT, "ies.db")
+    schema_path = os.path.join(MODULES_DIR, "db", "schema.sql")
+
+    print("schema_path:", schema_path)
+    print("db_path:", db_path)
+
     if os.path.exists(db_path):
         os.remove(db_path)
         print("Base anterior eliminada.")

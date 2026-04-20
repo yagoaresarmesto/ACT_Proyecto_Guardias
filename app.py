@@ -1,6 +1,6 @@
 from flask import Flask, render_template, redirect, url_for, request
 from modules.guardias.motor import obtener_guardias_para_vista
-from db.db_manager import sumar_guardia, guardar_guardia, obtener_profesores, registrar_entrada, obtener_presencia
+from modules.db.db_manager import sumar_guardia, guardar_guardia, obtener_profesores, registrar_entrada, obtener_presencia
 from datetime import date
 
 

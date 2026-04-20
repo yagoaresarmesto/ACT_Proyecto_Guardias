@@ -1,4 +1,4 @@
-from db.db_manager import obtener_profesores, obtener_horarios
+from modules.db.db_manager import obtener_profesores, obtener_horarios
 
 
 def ordenar_por_guardias(disponibles):
