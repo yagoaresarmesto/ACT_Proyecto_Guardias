@@ -4,8 +4,21 @@
 
 <div class="container">
 
-    <h1>Guardias</h1>
-    <p class="fecha">Fecha: {{ fecha }}</p>
+    <h1>Asignación de guardias</h1>
+
+    <form method="GET" action="/guardias" style="margin-bottom: 20px;">
+        <label>Fecha:</label>
+        <input type="date" name="fecha" value="{{ fecha }}">
+        <button type="submit">Ver</button>
+    </form>
+
+    {% if guardias|length == 0 %}
+
+        <p class="sin-guardias">
+            No hay guardias para esta fecha
+        </p>
+
+    {% else %}
 
     <table>
         <tr>
@@ -22,21 +35,60 @@
             <td>{{ g.aula }}</td>
 
             <td class="ausente">
-                ❌ {{ g.ausente_nombre }}
+                {{ g.ausente_nombre }}
             </td>
 
             <td>
+
                 {% if g.id_profesor_cubre %}
-                    ✔️ {{ g.cubre_nombre }}
+
+                    <span class="asignado">
+                        {{ g.cubre_nombre }}
+                    </span>
+
                 {% else %}
-                    <span class="pendiente">Pendiente</span>
+
+                    {% if ranking_por_guardia[g.id_guardia]|length == 0 %}
+
+                        <span class="sin-disponibles">
+                            Sin profesores disponibles
+                        </span>
+
+                    {% else %}
+
+                        <form method="POST" action="/asignar_guardia" class="form-inline">
+
+                            <input type="hidden" name="id_guardia" value="{{ g.id_guardia }}">
+                            <input type="hidden" name="fecha" value="{{ fecha }}">
+
+                            <select name="profesor_id" required>
+                                <option value="">-- Seleccionar --</option>
+
+                                {% for p_id in ranking_por_guardia[g.id_guardia] %}
+                                    <option value="{{ p_id }}">
+                                        {{ profesores_dict[p_id] }}
+                                    </option>
+                                {% endfor %}
+                            </select>
+
+                            <button type="submit" class="btn-asignar">
+                                Asignar
+                            </button>
+
+                        </form>
+
+                    {% endif %}
+
                 {% endif %}
+
             </td>
         </tr>
 
         {% endfor %}
 
     </table>
+
+    {% endif %}
 
 </div>
 

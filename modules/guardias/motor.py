@@ -3,9 +3,6 @@ from modules.db.db_manager import (
     obtener_presentes,
     crear_ausencia,
     crear_guardia,
-    obtener_guardias,
-    asignar_guardia,
-    sumar_guardia,
     existe_guardia
 )
 
@@ -17,7 +14,6 @@ def detectar_ausencias(dia_semana, fecha):
     ausencias = []
 
     for h in horario:
-        # Solo nos interesan clases
         if h["tipo"] != "clase":
             continue
 
@@ -49,12 +45,11 @@ def crear_guardias_desde_ausencias(ausencias, fecha):
                 a["profesor"]
             )
 
+
 def obtener_disponibles(dia_semana, fecha, hora):
     horario = obtener_horario_por_dia(dia_semana)
-
     presentes = obtener_presentes(fecha, hora)
 
-    # Profesores ocupados (tienen clase en esa hora)
     ocupados = {
         h["id_profesor"]
         for h in horario
@@ -66,40 +61,15 @@ def obtener_disponibles(dia_semana, fecha, hora):
     return disponibles
 
 
-def asignar_guardias(dia_semana, fecha):
-    guardias = obtener_guardias(fecha)
+def obtener_ranking_guardia(dia_semana, fecha, hora):
+    disponibles = obtener_disponibles(dia_semana, fecha, hora)
 
-    for g in guardias:
-        # Si ya está asignada, saltar
-        if g["id_profesor_cubre"] is not None:
-            continue
+    if not disponibles:
+        return []
 
-        hora = g["hora"]
-
-        disponibles = obtener_disponibles(dia_semana, fecha, hora)
-
-        if not disponibles:
-            continue
-
-        # Ordenar según reglas (guardias acumuladas, etc.)
-        ranking = ordenar_por_guardias(disponibles)
-
-        profesor_elegido = ranking[0]  # id profesor
-
-        asignar_guardia(g["id_guardia"], profesor_elegido)
-        sumar_guardia(profesor_elegido)
+    return ordenar_por_guardias(disponibles)
 
 
 def generar_guardias(dia_semana, fecha):
-    """
-    Ejecuta todo el flujo:
-    1. Detecta ausencias
-    2. Crea guardias
-    3. Asigna profesores
-    """
-
     ausencias = detectar_ausencias(dia_semana, fecha)
-
     crear_guardias_desde_ausencias(ausencias, fecha)
-
-    asignar_guardias(dia_semana, fecha)

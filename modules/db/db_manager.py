@@ -193,7 +193,7 @@ def obtener_guardias(fecha):
         LEFT JOIN profesores p1 ON g.id_profesor_ausente = p1.id_profesor
         LEFT JOIN profesores p2 ON g.id_profesor_cubre = p2.id_profesor
         WHERE g.fecha = ?
-        ORDER BY g.hora
+        ORDER BY g.hora, g.aula
     """, (fecha,))
 
     data = cursor.fetchall()
