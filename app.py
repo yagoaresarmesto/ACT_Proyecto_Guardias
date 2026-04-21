@@ -19,16 +19,16 @@ def vista_guardias():
     ranking_por_guardia = {}
 
     for g in guardias:
-        ranking_por_guardia[g["id_guardia"]] = obtener_ranking_guardia(
+        ranking_por_guardia[g.id_guardia] = obtener_ranking_guardia(
             dia_semana,
             fecha,
-            g["hora"]
+            g.hora
         )
 
     profesores = obtener_profesores()
 
     profesores_dict = {
-        p["id_profesor"]: p["nombre"]
+        p.id_profesor: p.nombre
         for p in profesores
     }
 

@@ -13,7 +13,7 @@ def ordenar_por_guardias(profesores_ids):
 
     # Filtrar solo los profesores disponibles
     profesores_filtrados = [
-        p for p in profesores if p["id_profesor"] in profesores_ids
+        p for p in profesores if p.id_profesor in profesores_ids
     ]
 
     # Ordenar:
@@ -21,8 +21,8 @@ def ordenar_por_guardias(profesores_ids):
     # 2. Menor id (desempate estable)
     profesores_ordenados = sorted(
         profesores_filtrados,
-        key=lambda p: (p["guardias_acumuladas"], p["id_profesor"])
+        key=lambda p: (p.guardias_acumuladas, p.id_profesor)
     )
 
     # Devolver solo ID
-    return [p["id_profesor"] for p in profesores_ordenados]
+    return [p.id_profesor for p in profesores_ordenados]

@@ -1,4 +1,6 @@
 import sqlite3
+from modules.db.models import Profesor, Guardia
+
 DB_NAME = "ies.db"
 
 def get_connection():
@@ -28,7 +30,7 @@ def obtener_profesores():
     profesores = cursor.fetchall()
 
     conn.close()
-    return profesores
+    return [Profesor(**p) for p in profesores]
 
 
 def sumar_guardia(id_profesor):
@@ -198,7 +200,7 @@ def obtener_guardias(fecha):
 
     data = cursor.fetchall()
     conn.close()
-    return data
+    return [Guardia(**g) for g in data]
 
 def existe_guardia(fecha, hora, aula):
     conn = get_connection()
