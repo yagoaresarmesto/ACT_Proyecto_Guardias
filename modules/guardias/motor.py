@@ -5,7 +5,8 @@ from modules.db.db_manager import (
     crear_guardia,
     obtener_guardias,
     asignar_guardia,
-    sumar_guardia
+    sumar_guardia,
+    existe_guardia
 )
 
 from modules.guardias.reglas import ordenar_por_guardias
@@ -40,13 +41,13 @@ def detectar_ausencias(dia_semana, fecha):
 
 def crear_guardias_desde_ausencias(ausencias, fecha):
     for a in ausencias:
-        crear_guardia(
-            fecha,
-            a["hora"],
-            a["aula"],
-            a["profesor"]
-        )
-
+        if not existe_guardia(fecha, a["hora"], a["aula"]):
+            crear_guardia(
+                fecha,
+                a["hora"],
+                a["aula"],
+                a["profesor"]
+            )
 
 def obtener_disponibles(dia_semana, fecha, hora):
     horario = obtener_horario_por_dia(dia_semana)

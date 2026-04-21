@@ -4,7 +4,6 @@ import os
 def init_db():
     MODULES_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))  # .../proyecto_guardias/modules
     PROJECT_ROOT = os.path.dirname(MODULES_DIR)  # .../proyecto_guardias
-
     db_path = os.path.join(PROJECT_ROOT, "ies.db")
     schema_path = os.path.join(MODULES_DIR, "db", "schema.sql")
 

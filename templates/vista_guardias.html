@@ -4,63 +4,35 @@
 
 <div class="container">
 
-    <h1>Asignación de guardias</h1>
+    <h1>Guardias</h1>
     <p class="fecha">Fecha: {{ fecha }}</p>
-
-    <!-- 🔥 Selector de fecha -->
-    <form method="GET" class="form-fecha">
-        <input type="date" name="fecha" value="{{ fecha }}">
-        <button type="submit">Ver</button>
-    </form>
 
     <table>
         <tr>
-            <th>Aula</th>
             <th>Hora</th>
-            <th>Profesor</th>
-            <th></th>
+            <th>Aula</th>
+            <th>Profesor ausente</th>
+            <th>Profesor que cubre</th>
         </tr>
 
         {% for g in guardias %}
 
-        {% if g.asignada %}
-
         <tr>
-            <td>{{ g.aula }}</td>
             <td>{{ g.hora }}</td>
-            <td class="asignado"> {{ g.profesor[1] }}</td>
-            <td>✔️</td>
-        </tr>
-
-        {% else %}
-
-        <form method="POST" action="/asignar_guardia">
-        <tr>
             <td>{{ g.aula }}</td>
-            <td>{{ g.hora }}</td>
 
-            <td>
-                <select name="profesor_id">
-                    <option value="">-- Seleccionar profesor --</option>
-
-                    {% for p in g.profesores %}
-                        <option value="{{ p[0] }}">{{ p[1] }}</option>
-                    {% endfor %}
-                </select>
+            <td class="ausente">
+                ❌ {{ g.ausente_nombre }}
             </td>
 
             <td>
-                <input type="hidden" name="aula" value="{{ g.aula }}">
-                <input type="hidden" name="hora" value="{{ g.hora }}">
-
-                <button class="btn-asignar" type="submit">
-                    Asignar
-                </button>
+                {% if g.id_profesor_cubre %}
+                    ✔️ {{ g.cubre_nombre }}
+                {% else %}
+                    <span class="pendiente">Pendiente</span>
+                {% endif %}
             </td>
         </tr>
-        </form>
-
-        {% endif %}
 
         {% endfor %}
 

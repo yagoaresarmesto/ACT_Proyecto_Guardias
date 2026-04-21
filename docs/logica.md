@@ -1,125 +1,129 @@
 # Lógica del sistema
 
-## Detección de ausencias
-
-El sistema compara:
-
-- Horarios → profesores que deberían estar
-- Presencia → profesores que han fichado
-
-La diferencia entre ambos determina los profesores ausentes.
-
-Ejemplo:
-
-HORARIO = {1, 2, 3}  
-PRESENCIA = {1, 3}  
-
-Resultado: AUSENTES = {2}
+El sistema de guardias se basa en la comparación entre la planificación del centro y la situación real de los profesores en cada momento.
 
 ---
 
-## Motor de guardias (fase inicial)
+## Enfoque general
 
-El sistema comienza a generar guardias a partir de las ausencias detectadas.
+El objetivo es:
 
-### 1. Aulas sin profesor
-
-Se detectan las aulas que quedan sin profesor cuando un docente con horario no está presente.
-
-Ejemplo:
-
-- Profesor 2 tiene clase en Aula 102 a la hora 2
-- No ha registrado presencia
-
-Resultado:
-- Aula 102 necesita guardia
+- Detectar qué clases quedan sin profesor
+- Determinar qué profesores están disponibles
+- Asignar automáticamente quién cubre cada guardia
 
 ---
 
-### 2. Profesores disponibles
+##  Flujo de funcionamiento
 
-Un profesor se considera disponible si:
+El sistema sigue los siguientes pasos:
 
-- Está presente en el centro
+1. Obtener el horario del día
+2. Consultar la presencia real de los profesores
+3. Detectar ausencias
+4. Generar guardias necesarias
+5. Calcular profesores disponibles
+6. Asignar guardias automáticamente
+
+---
+
+##  1. Horario
+
+Se consulta la tabla `horario`, que define qué profesor debería estar en cada aula y hora.
+
+Solo se consideran las entradas con:
+
+
+Esta información representa la planificación teórica del centro.
+
+---
+
+##  2. Presencia
+
+Se consulta la tabla `presencia`, que indica qué profesores están presentes en cada hora del día.
+
+Esto permite conocer la disponibilidad real de cada profesor en tiempo real.
+
+---
+
+## 3. Detección de ausencias
+
+Un profesor se considera ausente cuando:
+
+- Tiene una clase asignada en el horario
+- No aparece como presente en esa hora
+
+
+Cada ausencia se registra en la tabla `ausencias`.
+
+---
+
+##  4. Generación de guardias
+
+Por cada ausencia detectada:
+
+- Se crea una guardia
+- Se registra el aula, la hora y el profesor ausente
+
+Antes de crear una guardia, se comprueba si ya existe una para evitar duplicados.
+
+La condición utilizada es:
+
+
+
+---
+
+##  5. Profesores disponibles
+
+Un profesor se considera disponible cuando:
+
+- Está presente en esa hora
 - No tiene clase asignada en esa hora
 
-Cálculo:
 
-DISPONIBLES = PRESENTES - OCUPADOS
+Los profesores ocupados son aquellos que tienen: tipo = clase
 
-Ejemplo:
-
-PRESENTES = {1, 3}  
-OCUPADOS = {3}  
-
-Resultado: DISPONIBLES = {1}
 
 ---
 
-## Ejemplo completo de funcionamiento
+## 6. Asignación de guardias
 
-Se ha probado el sistema con el siguiente escenario:
+Para cada guardia sin cubrir:
 
-### Profesores
-- Profesor 1
-- Profesor 2
-- Profesor 3
-
-### Horarios
-- Profesor 1 → Lunes, hora 1 → Aula 101
-- Profesor 2 → Lunes, hora 2 → Aula 102
-- Profesor 3 → Lunes, hora 2 → Aula 103
-
-### Presencia
-- Profesor 1 → presente
-- Profesor 3 → presente
-- Profesor 2 → ausente
+1. Se obtiene la lista de profesores disponibles
+2. Se ordenan según criterios de prioridad
+3. Se selecciona el profesor con mayor prioridad
+4. Se asigna la guardia
 
 ---
 
-### Resultado del sistema
+## Criterio de prioridad
 
-#### 1. Ausencias detectadas
-Profesores ausentes:
+Los profesores se ordenan por:
 
-{2}
+1. Menor número de guardias acumuladas
+2. En caso de empate, menor ID de profesor
 
----
-
-#### 2. Aulas sin profesor
-
-[('Aula 102', 2)]
+Esto garantiza un reparto equilibrado de las guardias.
 
 ---
 
-#### 3. Profesores disponibles
+## Consideraciones
 
-Profesores presentes:
-
-{1, 3}
-
-Profesores ocupados en hora 2:
-
-{3}
-
-Profesores disponibles:
-
-{1}
+- Si no hay profesores disponibles, la guardia queda pendiente
+- El sistema depende de la presencia real en cada hora
+- Las guardias pueden asignarse automáticamente o manualmente
+- El sistema evita duplicados en la generación de guardias
 
 ---
 
-#### 4. Ranking de profesores
+## Resultado
 
-[(1, 'Profesor 1', 0, 0)]
+El sistema genera una lista de guardias que incluye:
 
----
+- Aula
+- Hora
+- Profesor ausente
+- Profesor asignado (si existe)
 
-### Conclusión
-
-El sistema identifica correctamente:
-
-- Qué profesor está ausente
-- Qué aula necesita cobertura
-- Qué profesor puede cubrir la guardia
-
-Este flujo constituye la base del motor de guardias.
+Esto permite visualizar rápidamente las incidencias del centro y gestionar la cobertura de clases.

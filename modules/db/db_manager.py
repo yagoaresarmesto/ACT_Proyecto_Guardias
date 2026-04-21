@@ -200,6 +200,20 @@ def obtener_guardias(fecha):
     conn.close()
     return data
 
+def existe_guardia(fecha, hora, aula):
+    conn = get_connection()
+    cursor = conn.cursor()
+
+    cursor.execute("""
+        SELECT 1 FROM guardias
+        WHERE fecha = ? AND hora = ? AND aula = ?
+    """, (fecha, hora, aula))
+
+    resultado = cursor.fetchone()
+
+    conn.close()
+
+    return resultado is not None
 
 def limpiar_bd_completa():
     conn = get_connection()
