@@ -115,13 +115,16 @@ El resultado es una lista ordenada de candidatos para cubrir la guardia.
 
 ## Criterio de prioridad
 
+## Criterio de prioridad
+
 Los profesores se ordenan por:
 
-1. Menor número de guardias acumuladas
-2. En caso de empate, menor ID de profesor
+1. Menor número de guardias acumuladas (criterio principal)  
+2. Menor número de guardias realizadas en la semana actual  
+3. Menor carga lectiva (número de horas de clase en su horario semanal)  
+4. En caso de empate, menor ID de profesor  
 
-Esto garantiza un reparto equilibrado de las guardias.
-
+Esto garantiza un reparto equilibrado de las guardias y evita sobrecargar a determinados docentes.
 ---
 
 ## 7. Asignación de guardias
