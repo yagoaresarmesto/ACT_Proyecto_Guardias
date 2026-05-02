@@ -5,7 +5,7 @@ from modules.db.db_manager import (
     crear_guardia,
     existe_guardia
 )
-
+from modules.presencia.registro import obtener_presentes_en_hora
 from modules.guardias.reglas import ordenar_por_guardias
 from modules.guardias.models import Guardia as GuardiaDominio
 
