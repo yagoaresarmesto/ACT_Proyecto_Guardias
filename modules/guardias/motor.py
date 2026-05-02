@@ -7,6 +7,7 @@ from modules.db.db_manager import (
 )
 
 from modules.guardias.reglas import ordenar_por_guardias
+from modules.guardias.models import Guardia as GuardiaDominio
 
 
 def detectar_ausencias(dia_semana, fecha):
@@ -24,11 +25,13 @@ def detectar_ausencias(dia_semana, fecha):
         presentes = obtener_presentes(fecha, hora)
 
         if profesor not in presentes:
-            ausencias.append({
-                "profesor": profesor,
-                "hora": hora,
-                "aula": aula
-            })
+            ausencia = GuardiaDominio(
+                hora=hora,
+                aula=aula,
+                id_profesor_ausente=profesor
+            )
+
+            ausencias.append(ausencia)
 
             crear_ausencia(profesor, fecha, hora)
 
@@ -37,12 +40,12 @@ def detectar_ausencias(dia_semana, fecha):
 
 def crear_guardias_desde_ausencias(ausencias, fecha):
     for a in ausencias:
-        if not existe_guardia(fecha, a["hora"], a["aula"]):
+        if not existe_guardia(fecha, a.hora, a.aula):
             crear_guardia(
                 fecha,
-                a["hora"],
-                a["aula"],
-                a["profesor"]
+                a.hora,
+                a.aula,
+                a.id_profesor_ausente
             )
 
 
@@ -71,5 +74,11 @@ def obtener_ranking_guardia(dia_semana, fecha, hora):
 
 
 def generar_guardias(dia_semana, fecha):
+    """
+    Flujo principal:
+    1. Detectar ausencias
+    2. Crear guardias (sin duplicados)
+    """
+
     ausencias = detectar_ausencias(dia_semana, fecha)
     crear_guardias_desde_ausencias(ausencias, fecha)

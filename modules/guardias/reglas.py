@@ -3,15 +3,10 @@ from modules.db.db_manager import (
     obtener_horario
 )
 
-#Calculo para la carga lectiva
+from modules.guardias.models import ProfesorDisponible
+
 def calcular_carga_lectiva():
-    """
-    Devuelve un diccionario:
-    {id_profesor: numero_de_clases}
-    """
-
     horario = obtener_horario()
-
     carga = {}
 
     for h in horario:
@@ -27,6 +22,26 @@ def calcular_carga_lectiva():
 
     return carga
 
+def construir_profesores_disponibles(profesores_ids):
+    profesores = obtener_profesores()
+    carga_lectiva = calcular_carga_lectiva()
+
+    disponibles = []
+
+    for p in profesores:
+        if p.id_profesor not in profesores_ids:
+            continue
+
+        disponible = ProfesorDisponible(
+            id_profesor=p.id_profesor,
+            guardias_acumuladas=p.guardias_acumuladas,
+            guardias_semana=p.guardias_semana,
+            carga_lectiva=carga_lectiva.get(p.id_profesor, 0)
+        )
+
+        disponibles.append(disponible)
+
+    return disponibles
 
 def ordenar_por_guardias(profesores_ids):
     """
@@ -34,27 +49,22 @@ def ordenar_por_guardias(profesores_ids):
     1. guardias acumuladas
     2. guardias en la semana
     3. carga lectiva
-    4. id (desempate final)
+    4. id (en caso de empate)
     """
 
     if not profesores_ids:
         return []
 
-    profesores = obtener_profesores()
-    carga_lectiva = calcular_carga_lectiva()
+    disponibles = construir_profesores_disponibles(profesores_ids)
 
-    profesores_filtrados = [
-        p for p in profesores if p.id_profesor in profesores_ids
-    ]
-
-    profesores_ordenados = sorted(
-        profesores_filtrados,
+    disponibles_ordenados = sorted(
+        disponibles,
         key=lambda p: (
             p.guardias_acumuladas,
             p.guardias_semana,
-            carga_lectiva.get(p.id_profesor, 0),
+            p.carga_lectiva,
             p.id_profesor
         )
     )
 
-    return [p.id_profesor for p in profesores_ordenados]
+    return [p.id_profesor for p in disponibles_ordenados]
