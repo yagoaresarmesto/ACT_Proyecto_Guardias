@@ -229,6 +229,29 @@ def borrar_presencia_hora(fecha, hora):
     conn.commit()
     conn.close()
 
+def existe_presencia(profesor_id, fecha, hora):
+    conn = get_connection()
+    cursor = conn.cursor()
+
+    cursor.execute("""
+        SELECT 1 FROM presencia
+        WHERE id_profesor = ? AND fecha = ? AND hora = ?
+    """, (profesor_id, fecha, hora))
+
+    return cursor.fetchone() is not None
+
+def borrar_presencia(id_profesor, fecha, hora):
+    conn = get_connection()
+    cursor = conn.cursor()
+
+    cursor.execute("""
+        DELETE FROM presencia
+        WHERE id_profesor = ? AND fecha = ? AND hora = ?
+    """, (id_profesor, fecha, hora))
+
+    conn.commit()
+    conn.close()
+
 def limpiar_bd_completa():
     conn = get_connection()
     cursor = conn.cursor()

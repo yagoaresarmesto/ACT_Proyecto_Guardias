@@ -6,49 +6,112 @@
 
     <h1>Registro de presencia</h1>
 
-    <!-- 🔹 Filtros -->
     <form method="GET" class="presencia-filtros">
         <div class="presencia-campo">
             <label>Fecha</label>
             <input type="date" name="fecha" value="{{ fecha }}">
         </div>
-
-        <div class="presencia-campo">
-            <label>Hora</label>
-            <input type="number" name="hora" value="{{ hora }}" min="1">
-        </div>
-
         <button type="submit" class="presencia-btn-ver">Ver</button>
     </form>
 
-    <!-- 🔹 Lista de profesores -->
-    <form method="POST" class="presencia-box">
+            <h3>
+    Estado
+    <span class="fecha-inline">{{ fecha }}</span>
+</h3>
 
-        <input type="hidden" name="fecha" value="{{ fecha }}">
-        <input type="hidden" name="hora" value="{{ hora }}">
+    <table>
+        <tr>
+            <th>Profesor</th>
+            <th>Horas presentes</th>
+        </tr>
 
-        <h3>Profesores</h3>
+        {% for p in profesores %}
+        <tr>
+            <td>{{ p.nombre }}</td>
+            <td>
+                {% if p.id_profesor in presencia_por_profesor %}
+                    {% for h in presencia_por_profesor[p.id_profesor] %}
+                        <span class="horas-chip">{{ h }}</span>
+                    {% endfor %}
+                {% else %}
+                    <span class="sin-presencia">Ausente</span>
+                {% endif %}
+            </td>
+        </tr>
+        {% endfor %}
+    </table>
 
-        <div class="presencia-lista">
-            {% for p in profesores %}
-                <label class="presencia-item">
-                    <input
-                        type="checkbox"
-                        name="profesores"
-                        value="{{ p.id_profesor }}"
-                        {% if p.id_profesor in presentes %}checked{% endif %}
-                    >
-                    <span>{{ p.nombre }}</span>
-                </label>
-            {% endfor %}
-        </div>
+    <div class="presencia-seccion">
 
-        <button type="submit" class="presencia-btn-guardar">
-            Guardar presencia
-        </button>
 
-    </form>
+        <p class="info-hora">
+            Hora actual: {{ hora_real }}
+
+            {% if hora_lectiva %}
+                <span class="hora-badge">{{ hora_lectiva }}ª hora</span>
+            {% else %}
+                <span class="fuera-horario">(fuera de horario o recreo)</span>
+            {% endif %}
+        </p>
+
+        <form method="POST" class="form-presencia">
+
+            <input type="hidden" name="fecha" value="{{ fecha }}">
+
+            <div class="presencia-campo">
+                <label>Profesor</label>
+                <select name="profesor_id" id="profesor-select" required>
+                    <option value="">-- Seleccionar --</option>
+                    {% for p in profesores %}
+                        <option value="{{ p.id_profesor }}">{{ p.nombre }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <button
+                id="btn-registro"
+                type="submit"
+                class="presencia-btn-guardar"
+                {% if not hora_lectiva %} disabled {% endif %}
+            >
+                Registrar paso
+            </button>
+
+        </form>
+
+    </div>
 
 </div>
 
+  <!-- Script para controlar el estado del botón guardar, tanto para desactivar el botón si esta fuera de horario lectivo saber si es entrada/salida, como si no hay profesor seleccionado -->
+<script>
+const select = document.getElementById("profesor-select");
+const boton = document.getElementById("btn-registro");
+
+const presentes = {{ presentes_ids | tojson }};
+
+function actualizarBoton() {
+    const profesorId = parseInt(select.value);
+
+    if (!profesorId) {
+        boton.disabled = true;
+        boton.textContent = "Registrar paso";
+        return;
+    }
+
+    boton.disabled = false;
+
+
+    if (presentes.includes(profesorId)) {
+        boton.textContent = "Registrar salida";
+    } else {
+        boton.textContent = "Registrar entrada";
+    }
+}
+
+select.addEventListener("change", actualizarBoton);
+
+
+actualizarBoton();
+</script>
 {% endblock %}

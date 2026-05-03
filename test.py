@@ -32,7 +32,7 @@ def test_horario():
 
     print("\nHorario:")
     for h in obtener_horario():
-        print(dict(h))  # 👈 este lo puedes dejar (no lo has modelado)
+        print(dict(h))
 
 
 def test_presencia():
@@ -74,6 +74,7 @@ def test_generar_guardias():
             g.ausente_nombre,
             g.cubre_nombre
         )
+
 
 
 def test_ranking():
@@ -190,3 +191,4 @@ if __name__ == "__main__":
 
     test_presencia()
     test_generar_guardias()
+

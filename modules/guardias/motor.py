@@ -82,3 +82,9 @@ def generar_guardias(dia_semana, fecha):
 
     ausencias = detectar_ausencias(dia_semana, fecha)
     crear_guardias_desde_ausencias(ausencias, fecha)
+
+    print("\n--- AUSENCIAS DETECTADAS ---")
+    for a in ausencias:
+        print(a.hora, a.aula, a.id_profesor_ausente)
+
+    crear_guardias_desde_ausencias(ausencias, fecha)
