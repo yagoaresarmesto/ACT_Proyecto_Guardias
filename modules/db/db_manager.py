@@ -217,6 +217,18 @@ def existe_guardia(fecha, hora, aula):
 
     return resultado is not None
 
+def borrar_presencia_hora(fecha, hora):
+    conn = get_connection()
+    cursor = conn.cursor()
+
+    cursor.execute("""
+        DELETE FROM presencia
+        WHERE fecha = ? AND hora = ?
+    """, (fecha, hora))
+
+    conn.commit()
+    conn.close()
+
 def limpiar_bd_completa():
     conn = get_connection()
     cursor = conn.cursor()
