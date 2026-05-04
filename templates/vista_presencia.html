@@ -6,18 +6,29 @@
 
     <h1>Historial de presencia</h1>
 
-    <form method="GET" class="presencia-filtros">
-        <div class="presencia-campo">
-            <label>Fecha</label>
-            <input
-                type="date"
-                name="fecha"
-                value="{{ fecha }}"
-                onchange="this.form.requestSubmit()"
-            >
-        </div>
-    </form>
+    <!-- 🔹 Filtro + botón -->
+    <div class="header-presencia">
 
+        <form method="GET" class="presencia-filtros">
+            <div class="presencia-campo">
+                <label>Fecha</label>
+                <input
+                    type="date"
+                    name="fecha"
+                    value="{{ fecha }}"
+                    onchange="this.form.requestSubmit()"
+                >
+            </div>
+        </form>
+
+        <!-- 🔥 BOTÓN MODAL -->
+        <button class="btn-abrir-modal" onclick="abrirModal()">
+            Registrar presencia
+        </button>
+
+    </div>
+
+    <!-- 🔹 TABLA -->
     <table>
         <tr>
             <th>Profesor</th>
@@ -40,7 +51,14 @@
         {% endfor %}
     </table>
 
-    <div class="presencia-seccion">
+</div>
+
+<!-- 🔥 MODAL -->
+<div id="modal-presencia" class="modal-overlay">
+
+    <div class="modal">
+
+        <h3>Registrar presencia</h3>
 
         <p class="info-hora">
             Hora actual: {{ hora_real }}
@@ -66,14 +84,20 @@
                 </select>
             </div>
 
-            <button
-                id="btn-registro"
-                type="submit"
-                class="presencia-btn-guardar"
-                {% if not hora_lectiva %} disabled {% endif %}
-            >
-                Registrar paso
-            </button>
+            <div class="modal-actions">
+                <button type="button" class="btn-cerrar" onclick="cerrarModal()">
+                    Cancelar
+                </button>
+
+                <button
+                    id="btn-registro"
+                    type="submit"
+                    class="presencia-btn-guardar"
+                    {% if not hora_lectiva %} disabled {% endif %}
+                >
+                    Registrar paso
+                </button>
+            </div>
 
         </form>
 
@@ -81,8 +105,19 @@
 
 </div>
 
-
+<!-- 🔥 SCRIPT -->
 <script>
+
+// MODAL
+function abrirModal() {
+    document.getElementById("modal-presencia").style.display = "flex";
+}
+
+function cerrarModal() {
+    document.getElementById("modal-presencia").style.display = "none";
+}
+
+// BOTÓN DINÁMICO
 const select = document.getElementById("profesor-select");
 const boton = document.getElementById("btn-registro");
 
@@ -108,6 +143,7 @@ function actualizarBoton() {
 
 select.addEventListener("change", actualizarBoton);
 actualizarBoton();
+
 </script>
 
 {% endblock %}
