@@ -4,20 +4,19 @@
 
 <div class="container">
 
-    <h1>Registro de presencia</h1>
+    <h1>Historial de presencia</h1>
 
     <form method="GET" class="presencia-filtros">
         <div class="presencia-campo">
             <label>Fecha</label>
-            <input type="date" name="fecha" value="{{ fecha }}">
+            <input
+                type="date"
+                name="fecha"
+                value="{{ fecha }}"
+                onchange="this.form.requestSubmit()"
+            >
         </div>
-        <button type="submit" class="presencia-btn-ver">Ver</button>
     </form>
-
-            <h3>
-    Estado
-    <span class="fecha-inline">{{ fecha }}</span>
-</h3>
 
     <table>
         <tr>
@@ -42,7 +41,6 @@
     </table>
 
     <div class="presencia-seccion">
-
 
         <p class="info-hora">
             Hora actual: {{ hora_real }}
@@ -83,7 +81,7 @@
 
 </div>
 
-  <!-- Script para controlar el estado del botón guardar, tanto para desactivar el botón si esta fuera de horario lectivo saber si es entrada/salida, como si no hay profesor seleccionado -->
+
 <script>
 const select = document.getElementById("profesor-select");
 const boton = document.getElementById("btn-registro");
@@ -101,7 +99,6 @@ function actualizarBoton() {
 
     boton.disabled = false;
 
-
     if (presentes.includes(profesorId)) {
         boton.textContent = "Registrar salida";
     } else {
@@ -110,8 +107,7 @@ function actualizarBoton() {
 }
 
 select.addEventListener("change", actualizarBoton);
-
-
 actualizarBoton();
 </script>
+
 {% endblock %}

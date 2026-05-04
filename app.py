@@ -1,5 +1,5 @@
 from flask import Flask, render_template, request, redirect, url_for
-from datetime import date, datetime, time
+from datetime import date, datetime
 
 from modules.guardias.motor import generar_guardias, obtener_ranking_guardia
 from modules.db.db_manager import (
@@ -13,9 +13,31 @@ from modules.presencia.registro import obtener_presencia_dia, registrar_evento
 
 app = Flask(__name__)
 
+# -----------------------------
+# 🔥 TRAMOS HORARIOS (ÚNICA FUENTE)
+# -----------------------------
+TRAMOS_HORARIOS = {
+    1: ("08:50", "09:40"),
+    2: ("09:40", "10:30"),
+    3: ("10:30", "11:20"),
+    4: ("11:40", "12:30"),
+    5: ("12:30", "13:20"),
+    6: ("13:20", "14:10"),
+    7: ("16:00", "17:00"),
+    8: ("17:00", "18:00"),
+    9: ("18:00", "19:00"),
+    10: ("19:00", "20:00"),
+}
 
+def obtener_tramo_hora(hora):
+    tramo = TRAMOS_HORARIOS.get(hora)
+    if tramo:
+        return f"{tramo[0]} - {tramo[1]}"
+    return ""
+
+# -----------------------------
 # GUARDIAS
-
+# -----------------------------
 @app.route('/guardias')
 def vista_guardias():
     fecha = request.args.get("fecha", date.today().isoformat())
@@ -39,13 +61,12 @@ def vista_guardias():
     for g in guardias:
         print(f"Aula {g.aula} - Hora {g.hora}")
         print("Ausente:", g.ausente_nombre)
-        print("Ranking:", ranking_por_guardia[g.id_guardia])
 
     profesores = obtener_profesores()
 
     profesores_dict = {
         p.id_profesor: p.nombre
-    for p in profesores
+        for p in profesores
     }
 
     return render_template(
@@ -54,6 +75,7 @@ def vista_guardias():
         fecha=fecha,
         ranking_por_guardia=ranking_por_guardia,
         profesores_dict=profesores_dict,
+        obtener_tramo_hora=obtener_tramo_hora
     )
 
 
@@ -80,38 +102,24 @@ def asignar_guardia_manual():
     return redirect(url_for('vista_guardias', fecha=fecha))
 
 
+# -----------------------------
 # PRESENCIA
-
+# -----------------------------
 def obtener_hora_lectiva_actual():
     """
     MODO TEST
-    Fuerza siempre la 3ª hora para poder probar el sistema sin depender del reloj real
     """
+    return 3
 
-    return 3  # 🔥 CAMBIAR / ELIMINAR
-
-    # DESCOMENTAR PARA REGISTRAR HORA REAL
-
+    # -----------------------------
+    # DESCOMENTAR
+    # -----------------------------
     # ahora = datetime.now().time()
     #
-    # tramos = [
-    #     (time(8, 50), time(9, 40), 1),
-    #     (time(9, 40), time(10, 30), 2),
-    #     (time(10, 30), time(11, 20), 3),
+    # for hora, (inicio_str, fin_str) in TRAMOS_HORARIOS.items():
+    #     inicio = datetime.strptime(inicio_str, "%H:%M").time()
+    #     fin = datetime.strptime(fin_str, "%H:%M").time()
     #
-    #     (time(11, 20), time(11, 40), None),  # Recreo
-    #
-    #     (time(11, 40), time(12, 30), 4),
-    #     (time(12, 30), time(13, 20), 5),
-    #     (time(13, 20), time(14, 10), 6),
-    #
-    #     (time(16, 0), time(17, 0), 7),
-    #     (time(17, 0), time(18, 0), 8),
-    #     (time(18, 0), time(19, 0), 9),
-    #     (time(19, 0), time(20, 0), 10),
-    # ]
-    #
-    # for inicio, fin, hora in tramos:
     #     if inicio <= ahora < fin:
     #         return hora
     #
@@ -125,7 +133,7 @@ def vista_presencia():
     hora_real = datetime.now().strftime("%H:%M")
     hora_lectiva = obtener_hora_lectiva_actual()
 
-    # POST → registrar entrada/salida
+    # 🔹 POST → registrar entrada/salida
     if request.method == 'POST':
         profesor_id = request.form.get("profesor_id")
 
@@ -133,18 +141,15 @@ def vista_presencia():
             print("⚠️ No se seleccionó profesor")
             return redirect(url_for('vista_presencia', fecha=fecha))
 
-        hora = obtener_hora_lectiva_actual()
-
         print("\n--- REGISTRO DE PRESENCIA ---")
         print("Fecha:", fecha)
         print("Profesor:", profesor_id)
-        print("Hora lectiva:", hora)
+        print("Hora lectiva:", hora_lectiva)
 
-        registrar_evento(int(profesor_id), fecha, hora)
+        registrar_evento(int(profesor_id), fecha, hora_lectiva)
 
         return redirect(url_for('vista_presencia', fecha=fecha))
 
-    # GET → mostrar estado
     profesores = obtener_profesores()
     presencia = obtener_presencia_dia(fecha)
 
@@ -152,12 +157,14 @@ def vista_presencia():
 
     for p in presencia:
         if int(p["presente"]) == 1:
-            presencia_por_profesor.setdefault(p["id_profesor"], []).append(int(p["hora"]))
+            presencia_por_profesor.setdefault(
+                p["id_profesor"], []
+            ).append(int(p["hora"]))
 
     presentes_ids = list(presencia_por_profesor.keys())
 
     print("\n--- PRESENCIA ---")
-    print("Hora forzada:", hora_lectiva)
+    print("Hora actual:", hora_lectiva)
     print("Presentes:", presentes_ids)
 
     return render_template(

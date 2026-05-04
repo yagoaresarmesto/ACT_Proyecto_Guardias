@@ -6,10 +6,17 @@
 
     <h1>Asignación de guardias</h1>
 
-    <form method="GET" action="/guardias" style="margin-bottom: 20px;">
-        <label>Fecha:</label>
-        <input type="date" name="fecha" value="{{ fecha }}">
-        <button type="submit">Ver</button>
+    <!-- 🔹 Filtro por fecha (AUTO) -->
+    <form method="GET" action="/guardias" class="presencia-filtros">
+        <div class="presencia-campo">
+            <label>Fecha</label>
+            <input
+                type="date"
+                name="fecha"
+                value="{{ fecha }}"
+                onchange="this.form.requestSubmit()"
+            >
+        </div>
     </form>
 
     {% if guardias|length == 0 %}
@@ -20,76 +27,110 @@
 
     {% else %}
 
-    <table>
-        <tr>
-            <th>Hora</th>
-            <th>Aula</th>
-            <th>Profesor ausente</th>
-            <th>Profesor que cubre</th>
-        </tr>
+        <!-- 🔥 WRAPPER RESPONSIVE -->
+        <div class="tabla-wrapper">
 
-        {% for g in guardias %}
+            <table>
+                <tr>
+                    <th>Hora</th>
+                    <th>Aula</th>
+                    <th>Profesor ausente</th>
+                    <th>Profesor que cubre</th>
+                </tr>
 
-        <tr>
-            <td>{{ g.hora }}</td>
-            <td>{{ g.aula }}</td>
+                {% for g in guardias %}
 
-            <td class="ausente">
-                {{ g.ausente_nombre }}
-            </td>
-
-            <td>
-
-                {% if g.id_profesor_cubre %}
-
-                    <span class="asignado">
-                        {{ g.cubre_nombre }}
-                    </span>
-
-                {% else %}
-
-                    {% if ranking_por_guardia[g.id_guardia]|length == 0 %}
-
-                        <span class="sin-disponibles">
-                            Sin profesores disponibles
+                <tr>
+                    <td>
+                        <span class="hora-num">
+                            {{ g.hora }}ª hora
                         </span>
+                        <span class="hora-tramo">
+                            ({{ obtener_tramo_hora(g.hora) }})
+                        </span>
+                    </td>
 
-                    {% else %}
+                    <td>{{ g.aula }}</td>
 
-                        <form method="POST" action="/asignar_guardia" class="form-inline">
+                    <td class="ausente">
+                        {{ g.ausente_nombre }}
+                    </td>
 
-                            <input type="hidden" name="id_guardia" value="{{ g.id_guardia }}">
-                            <input type="hidden" name="fecha" value="{{ fecha }}">
+                    <td>
 
-                            <select name="profesor_id" required>
-                                <option value="">-- Seleccionar --</option>
+                        {% if g.id_profesor_cubre %}
 
-                                {% for p_id in ranking_por_guardia[g.id_guardia] %}
-                                    <option value="{{ p_id }}">
-                                        {{ profesores_dict[p_id] }}
-                                    </option>
-                                {% endfor %}
-                            </select>
+                            <span class="asignado">
+                                {{ g.cubre_nombre }}
+                            </span>
 
-                            <button type="submit" class="btn-asignar">
-                                Asignar
-                            </button>
+                        {% else %}
 
-                        </form>
+                            {% if ranking_por_guardia[g.id_guardia]|length == 0 %}
 
-                    {% endif %}
+                                <span class="sin-disponibles">
+                                    Sin profesores disponibles
+                                </span>
 
-                {% endif %}
+                            {% else %}
 
-            </td>
-        </tr>
+                                <form method="POST" action="/asignar_guardia" class="form-inline">
 
-        {% endfor %}
+                                    <input type="hidden" name="id_guardia" value="{{ g.id_guardia }}">
+                                    <input type="hidden" name="fecha" value="{{ fecha }}">
 
-    </table>
+                                    <select name="profesor_id" required>
+                                        <option value="">-- Seleccionar --</option>
+
+                                        {% for p_id in ranking_por_guardia[g.id_guardia] %}
+                                            <option value="{{ p_id }}">
+                                                {{ profesores_dict[p_id] }}
+                                            </option>
+                                        {% endfor %}
+                                    </select>
+
+                                    <button
+                                        type="submit"
+                                        class="btn-asignar"
+                                        disabled
+                                    >
+                                        Asignar
+                                    </button>
+
+                                </form>
+
+                            {% endif %}
+
+                        {% endif %}
+
+                    </td>
+                </tr>
+
+                {% endfor %}
+
+            </table>
+
+        </div>
 
     {% endif %}
 
 </div>
+
+<!-- 🔥 CONTROL BOTÓN ASIGNAR -->
+<script>
+document.querySelectorAll(".form-inline").forEach(form => {
+
+    const select = form.querySelector("select");
+    const boton = form.querySelector(".btn-asignar");
+
+    function actualizarBoton() {
+        boton.disabled = !select.value;
+    }
+
+    select.addEventListener("change", actualizarBoton);
+    actualizarBoton();
+
+});
+</script>
 
 {% endblock %}
