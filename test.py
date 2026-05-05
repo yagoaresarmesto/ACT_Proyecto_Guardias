@@ -1,7 +1,8 @@
 from modules.db.db_manager import (
     crear_profesor, obtener_profesores,
     crear_horario, obtener_horario,
-    registrar_presencia, obtener_presencia,
+    registrar_evento, obtener_eventos,
+    obtener_presentes,
     obtener_guardias,
     limpiar_bd_completa, sumar_guardia
 )
@@ -10,6 +11,9 @@ from modules.guardias.motor import generar_guardias
 from modules.guardias.reglas import ordenar_por_guardias
 
 
+# -----------------------------
+# PROFESORES
+# -----------------------------
 def test_profesores():
     crear_profesor("Yago Ares")
     crear_profesor("Jesús Ares")
@@ -22,6 +26,9 @@ def test_profesores():
         print(p.id_profesor, p.nombre, p.guardias_acumuladas)
 
 
+# -----------------------------
+# HORARIO
+# -----------------------------
 def test_horario():
     crear_horario(1, 1, 1, "clase", "Aula 101")
     crear_horario(2, 1, 1, "clase", "Aula 102")
@@ -35,46 +42,41 @@ def test_horario():
         print(dict(h))
 
 
-def test_presencia():
+# -----------------------------
+# PRESENCIA (NUEVO MODELO)
+# -----------------------------
+def test_presencia_eventos():
     fecha = "2026-04-20"
 
-    presentes = [1, 3, 4, 5]
+    print("\n--- EVENTOS PRESENCIA ---")
 
-    for p in presentes:
-        registrar_presencia(p, fecha, 1)
+    # Profesor 1 entra en hora 1
+    registrar_evento(1, fecha, 1, "entrada")
 
-    print("\nPresencia:")
-    for p in obtener_presencia(fecha):
-        print(dict(p))  # 👈 sigue siendo Row
+    # Profesor 1 sale en hora 3
+    registrar_evento(1, fecha, 3, "salida")
+
+    # Profesor 3 entra y no sale
+    registrar_evento(3, fecha, 1, "entrada")
+
+    eventos = obtener_eventos(fecha)
+
+    for e in eventos:
+        print(dict(e))
+
+    presentes = obtener_presentes(fecha)
+    print("Presentes actualmente:", presentes)
 
 
+# -----------------------------
+# RANKING
+# -----------------------------
 def preparar_ranking_real():
     print("\n--- PREPARANDO RANKING REAL ---")
 
     sumar_guardia(4)
     sumar_guardia(5)
     sumar_guardia(5)
-
-
-def test_generar_guardias():
-    fecha = "2026-04-20"
-    dia = 1
-
-    print("\n--- GENERANDO GUARDIAS ---")
-    generar_guardias(dia, fecha)
-
-    print("\nGuardias:")
-    guardias = obtener_guardias(fecha)
-
-    for g in guardias:
-        print(
-            g.id_guardia,
-            g.aula,
-            g.hora,
-            g.ausente_nombre,
-            g.cubre_nombre
-        )
-
 
 
 def test_ranking():
@@ -92,14 +94,16 @@ def test_ranking():
     print("Resultado:", ranking)
 
 
+# -----------------------------
+# ESCENARIOS
+# -----------------------------
 def escenario_todos_presentes():
     print("\n--- ESCENARIO: TODOS PRESENTES ---")
 
     fecha = "2026-04-21"
 
     for p in range(1, 6):
-        for h in range(1, 4):
-            registrar_presencia(p, fecha, h)
+        registrar_evento(p, fecha, 1, "entrada")
 
     generar_guardias(1, fecha)
 
@@ -129,7 +133,8 @@ def escenario_ocupados_no_disponibles():
 
     fecha = "2026-04-23"
 
-    registrar_presencia(1, fecha, 1)
+    # Profesor 1 entra pero está en clase
+    registrar_evento(1, fecha, 1, "entrada")
 
     generar_guardias(1, fecha)
 
@@ -158,7 +163,7 @@ def escenario_empate_ranking():
     fecha = "2026-04-25"
 
     for p in [1, 2, 3]:
-        registrar_presencia(p, fecha, 1)
+        registrar_evento(p, fecha, 1, "entrada")
 
     generar_guardias(1, fecha)
 
@@ -168,11 +173,17 @@ def escenario_empate_ranking():
         print(g.aula, g.cubre_nombre)
 
 
+# -----------------------------
+# LIMPIEZA
+# -----------------------------
 def test_limpiar_bd():
     limpiar_bd_completa()
     print("\nBase de datos limpiada")
 
 
+# -----------------------------
+# MAIN
+# -----------------------------
 if __name__ == "__main__":
     test_limpiar_bd()
 
@@ -189,6 +200,4 @@ if __name__ == "__main__":
     escenario_evitar_duplicados()
     escenario_empate_ranking()
 
-    test_presencia()
-    test_generar_guardias()
-
+    test_presencia_eventos()

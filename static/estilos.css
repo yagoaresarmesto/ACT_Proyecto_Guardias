@@ -59,8 +59,10 @@ h1 {
 
 .tabla-wrapper {
     width: 100%;
+    max-height: 400px;
+    overflow-y: auto;
     overflow-x: auto;
-    padding-bottom: 5px;
+    padding-right: 8px;
 }
 
 table {
@@ -75,6 +77,10 @@ th {
     border-bottom: 2px solid #ddd;
     font-size: 14px;
     color: #555;
+    position: sticky;
+    top: 0;
+    background-color: white;
+    z-index: 2;
 }
 
 td {
@@ -89,7 +95,8 @@ tr:hover {
 
 /* FORMULARIOS */
 
-form {
+/* 🔥 SOLO PARA FORMULARIOS INLINE (NO GLOBAL) */
+.form-inline {
     display: flex;
     gap: 10px;
     align-items: center;
@@ -102,7 +109,9 @@ select {
     min-width: 180px;
 }
 
-/* GUARDIAS */
+/* =============================
+   GUARDIAS
+============================= */
 
 .hora-num {
     font-size: 13.5px;
@@ -118,13 +127,22 @@ select {
 }
 
 .ausente {
-      color: #6c757d;
+    color: #6c757d;
     font-weight: bold;
 }
 
 .asignado {
     color: #28a745;
     font-weight: bold;
+}
+
+.fila-pasada {
+    opacity: 0.6;
+}
+
+.guardia-pasada {
+    color: #999;
+    font-style: italic;
 }
 
 .sin-disponibles {
@@ -135,12 +153,6 @@ select {
 .sin-guardias {
     color: #666;
     font-style: italic;
-}
-
-.form-inline {
-    display: flex;
-    gap: 8px;
-    flex-wrap: nowrap;
 }
 
 .btn-asignar {
@@ -161,62 +173,98 @@ select {
     opacity: 0.7;
 }
 
-/* -----------------------------
+/* =============================
    PRESENCIA
------------------------------ */
+============================= */
+
+/* HEADER */
+
+.header-presencia {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    margin-bottom: 20px;
+}
+
+/* FORM FECHA */
 
 .presencia-filtros {
     display: flex;
     align-items: flex-end;
     gap: 15px;
-    margin-bottom: 20px;
+    margin: 0;
 }
 
-.presencia-campo {
+.grupo-fecha {
     display: flex;
     flex-direction: column;
-    font-size: 14px;
-    height: 36px;
 }
 
-.presencia-campo label {
+.grupo-fecha label {
     margin-bottom: 5px;
     color: #555;
+    font-size: 14px;
 }
 
-.presencia-campo input {
+.grupo-fecha input {
+    height: 38px;
     padding: 6px 10px;
     border-radius: 6px;
     border: 1px solid #ccc;
-    height: 22px;
-}
-
-/* SECCIÓN REGISTRO */
-
-.presencia-seccion {
-    margin-top: 30px;
-    padding-top: 20px;
-    border-top: 1px solid #eee;
-}
-
-/* FORMULARIO REGISTRO */
-
-.form-presencia {
-    display: flex;
-    align-items: flex-end;
-    gap: 15px;
-    flex-wrap: wrap;
-}
-
-.form-presencia select {
-    padding: 6px 10px;
-    border-radius: 6px;
-    border: 1px solid #ccc;
-    min-width: 180px;
-    height: 36px;
+    font-size: 14px;
 }
 
 /* BOTÓN REGISTRAR */
+
+.btn-abrir-modal {
+    height: 38px;
+    padding: 0 16px;
+    background-color: #28a745;
+    color: white;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+}
+
+.btn-abrir-modal:hover {
+    background-color: #218838;
+}
+
+/* EVENTOS */
+
+.presencia-evento {
+    display: inline-block;
+    margin-right: 10px;
+}
+
+.entrada {
+    color: #28a745;
+    font-weight: 500;
+}
+
+.salida {
+    color: #dc3545;
+    font-weight: 500;
+}
+
+.sin-presencia {
+    color: #999;
+    font-style: italic;
+}
+
+/* FORM MODAL */
+
+.form-presencia {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.form-presencia select {
+    height: 36px;
+}
+
+/* BOTÓN GUARDAR */
 
 .presencia-btn-guardar {
     height: 36px;
@@ -226,8 +274,6 @@ select {
     border: none;
     border-radius: 6px;
     font-weight: 500;
-    display: inline-flex;
-    align-items: center;
     cursor: pointer;
 }
 
@@ -249,8 +295,6 @@ select {
     margin: 10px 0 20px 0;
 }
 
-/* BADGE HORA */
-
 .hora-badge {
     background: #007bff;
     color: white;
@@ -260,58 +304,16 @@ select {
     margin-left: 8px;
 }
 
-/* FUERA DE HORARIO */
-
 .fuera-horario {
     color: #dc3545;
     font-size: 13px;
     margin-left: 8px;
 }
 
-/* HORAS PRESENTES */
+/* =============================
+   MODAL
+============================= */
 
-.horas-chip {
-    display: inline-block;
-    padding: 4px 8px;
-    margin-right: 5px;
-    border-radius: 5px;
-    background-color: #e9f2ff;
-    color: #007bff;
-    font-size: 13px;
-    font-weight: 500;
-}
-
-/* AUSENTE */
-
-.sin-presencia {
-    color: #999;
-    font-style: italic;
-}
-
-/* HEADER */
-.header-presencia {
-    display: flex;
-    justify-content: space-between;
-    align-items: flex-end;
-    margin-bottom: 20px;
-}
-
-/* BOTÓN */
-.btn-abrir-modal {
-    background-color: #28a745;
-    color: white;
-    border: none;
-    border-radius: 6px;
-    height: 36px;
-    padding: 0 16px;
-    cursor: pointer;
-}
-
-.btn-abrir-modal:hover {
-    background-color: #218838;
-}
-
-/* MODAL */
 .modal-overlay {
     position: fixed;
     top: 0;
@@ -324,27 +326,19 @@ select {
     align-items: center;
 }
 
-/* CAJA */
 .modal {
-    width: 240px;               /* 🔥 más compacto */
+    width: 260px;
     max-width: 90%;
     background: white;
     border-radius: 12px;
-    padding: 20px 22px;         /* 🔥 menos aire */
+    padding: 20px 22px;
     box-shadow: 0 10px 30px rgba(0,0,0,0.15);
 }
 
-/* TÍTULO */
 .modal h3 {
     margin-top: 0;
     margin-bottom: 15px;
     font-size: 20px;
-}
-
-/* INFO HORA */
-.modal .info-hora {
-    font-size: 14px;
-    margin-bottom: 15px;
 }
 
 .modal select {
@@ -355,35 +349,23 @@ select {
 
 .modal-actions {
     display: flex;
-    justify-content: flex-end;   /* 🔥 alineados a la derecha */
-    gap: 10px;
-    margin-top: 10px;
-}
-
-/* BOTONES */
-.modal-actions {
-    display: flex;
     justify-content: flex-end;
     gap: 10px;
     margin-top: 15px;
 }
 
-/* BOTÓN CANCELAR */
+.modal-overlay {
+    z-index: 1000;
+}
+
+.modal {
+    z-index: 1001;
+}
+
 .btn-cerrar {
     background: #e0e0e0;
     border: none;
     border-radius: 6px;
     padding: 8px 14px;
     cursor: pointer;
-}
-
-
-.modal {
-    transform: scale(0.95);
-    transition: all 0.2s ease;
-}
-
-
-.modal-actions .presencia-btn-guardar {
-    padding: 8px 14px;
 }

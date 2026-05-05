@@ -6,9 +6,22 @@
 
     <h1>Asignación de guardias</h1>
 
-    <!-- 🔹 Filtro por fecha (AUTO) -->
+    <!-- 🔥 INFO HORA (NUEVO) -->
+    <p class="info-hora">
+        Hora actual: {{ hora_real }}
+
+        {% if hora_actual %}
+            <span class="hora-badge">
+                {{ hora_actual }}ª hora ({{ obtener_tramo_hora(hora_actual) }})
+            </span>
+        {% else %}
+            <span class="fuera-horario">(fuera de horario o recreo)</span>
+        {% endif %}
+    </p>
+
+    <!-- 🔥 FILTRO -->
     <form method="GET" action="/guardias" class="presencia-filtros">
-        <div class="presencia-campo">
+        <div class="grupo-fecha">
             <label>Fecha</label>
             <input
                 type="date"
@@ -27,46 +40,55 @@
 
     {% else %}
 
-        <!-- 🔥 WRAPPER RESPONSIVE -->
         <div class="tabla-wrapper">
 
             <table>
-                <tr>
-                    <th>Hora</th>
-                    <th>Aula</th>
-                    <th>Profesor ausente</th>
-                    <th>Profesor que cubre</th>
-                </tr>
+                <thead>
+                    <tr>
+                        <th>Hora</th>
+                        <th>Aula</th>
+                        <th>Profesor ausente</th>
+                        <th>Profesor que cubre</th>
+                    </tr>
+                </thead>
+
+                <tbody>
 
                 {% for g in guardias %}
 
-                <tr>
-                    <td>
-                        <span class="hora-num">
-                            {{ g.hora }}ª hora
-                        </span>
-                        <span class="hora-tramo">
-                            ({{ obtener_tramo_hora(g.hora) }})
-                        </span>
-                    </td>
+                    {% set es_hoy = fecha == fecha_actual %}
+                    {% set es_pasada = es_hoy and hora_actual and g.hora < hora_actual %}
 
-                    <td>{{ g.aula }}</td>
+                    <tr class="{% if es_pasada %}fila-pasada{% endif %}">
 
-                    <td class="ausente">
-                        {{ g.ausente_nombre }}
-                    </td>
-
-                    <td>
-
-                        {% if g.id_profesor_cubre %}
-
-                            <span class="asignado">
-                                {{ g.cubre_nombre }}
+                        <td>
+                            <span class="hora-num">{{ g.hora }}ª hora</span>
+                            <span class="hora-tramo">
+                                ({{ obtener_tramo_hora(g.hora) }})
                             </span>
+                        </td>
 
-                        {% else %}
+                        <td>{{ g.aula }}</td>
 
-                            {% if ranking_por_guardia[g.id_guardia]|length == 0 %}
+                        <td class="ausente">
+                            {{ g.ausente_nombre }}
+                        </td>
+
+                        <td>
+
+                            {% if g.id_profesor_cubre %}
+
+                                <span class="asignado">
+                                    {{ g.cubre_nombre }}
+                                </span>
+
+                            {% elif es_pasada %}
+
+                                <span class="guardia-pasada">
+                                    No cubierta
+                                </span>
+
+                            {% elif ranking_por_guardia[g.id_guardia]|length == 0 %}
 
                                 <span class="sin-disponibles">
                                     Sin profesores disponibles
@@ -89,11 +111,7 @@
                                         {% endfor %}
                                     </select>
 
-                                    <button
-                                        type="submit"
-                                        class="btn-asignar"
-                                        disabled
-                                    >
+                                    <button type="submit" class="btn-asignar" disabled>
                                         Asignar
                                     </button>
 
@@ -101,12 +119,13 @@
 
                             {% endif %}
 
-                        {% endif %}
+                        </td>
 
-                    </td>
-                </tr>
+                    </tr>
 
                 {% endfor %}
+
+                </tbody>
 
             </table>
 
@@ -116,7 +135,6 @@
 
 </div>
 
-<!-- 🔥 CONTROL BOTÓN ASIGNAR -->
 <script>
 document.querySelectorAll(".form-inline").forEach(form => {
 

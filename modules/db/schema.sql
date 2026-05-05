@@ -26,8 +26,8 @@ CREATE TABLE presencia (
     id_presencia  INTEGER PRIMARY KEY AUTOINCREMENT,
     id_profesor   INTEGER NOT NULL,
     fecha         DATE NOT NULL,
-    hora          INTEGER NOT NULL,
-    presente      BOOLEAN NOT NULL CHECK(presente IN (0,1)),
+    hora          INTEGER NOT NULL CHECK(hora BETWEEN 1 AND 10),
+    tipo          TEXT NOT NULL CHECK(tipo IN ('entrada','salida')),
     FOREIGN KEY (id_profesor) REFERENCES profesores(id_profesor)
         ON DELETE CASCADE ON UPDATE CASCADE
 );

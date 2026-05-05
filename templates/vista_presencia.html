@@ -6,11 +6,10 @@
 
     <h1>Historial de presencia</h1>
 
-    <!-- 🔹 Filtro + botón -->
     <div class="header-presencia">
 
         <form method="GET" class="presencia-filtros">
-            <div class="presencia-campo">
+            <div class="grupo-fecha">
                 <label>Fecha</label>
                 <input
                     type="date"
@@ -21,41 +20,57 @@
             </div>
         </form>
 
-        <!-- 🔥 BOTÓN MODAL -->
         <button class="btn-abrir-modal" onclick="abrirModal()">
             Registrar presencia
         </button>
 
     </div>
 
-    <!-- 🔹 TABLA -->
-    <table>
-        <tr>
-            <th>Profesor</th>
-            <th>Horas presentes</th>
-        </tr>
+    <div class="tabla-wrapper">
+        <table>
+            <tr>
+                <th>Profesor</th>
+                <th>Registros</th>
+            </tr>
 
-        {% for p in profesores %}
-        <tr>
-            <td>{{ p.nombre }}</td>
-            <td>
-                {% if p.id_profesor in presencia_por_profesor %}
-                    {% for h in presencia_por_profesor[p.id_profesor] %}
-                        <span class="horas-chip">{{ h }}</span>
-                    {% endfor %}
-                {% else %}
-                    <span class="sin-presencia">Ausente</span>
-                {% endif %}
-            </td>
-        </tr>
-        {% endfor %}
-    </table>
+            {% for p in profesores %}
+            <tr>
+                <td>{{ p.nombre }}</td>
+                <td>
+
+                    {% if p.id_profesor in presencia_por_profesor %}
+
+                        {% for evento in presencia_por_profesor[p.id_profesor] %}
+                            <span class="presencia-evento">
+
+                                {% if evento.tipo == "entrada" %}
+                                    <span class="entrada">
+                                        {{ obtener_tramo_hora(evento.hora) }}
+                                    </span>
+
+                                {% elif evento.tipo == "salida" %}
+                                    <span class="salida">
+                                        {{ obtener_tramo_hora(evento.hora) }}
+                                    </span>
+
+                                {% endif %}
+
+                            </span>
+                        {% endfor %}
+
+                    {% else %}
+                        <span class="sin-presencia">Ausente</span>
+                    {% endif %}
+
+                </td>
+            </tr>
+            {% endfor %}
+        </table>
+    </div>
 
 </div>
 
-<!-- 🔥 MODAL -->
 <div id="modal-presencia" class="modal-overlay">
-
     <div class="modal">
 
         <h3>Registrar presencia</h3>
@@ -64,14 +79,21 @@
             Hora actual: {{ hora_real }}
 
             {% if hora_lectiva %}
-                <span class="hora-badge">{{ hora_lectiva }}ª hora</span>
+                <span class="hora-badge">
+                    {{ hora_lectiva }}ª hora ({{ obtener_tramo_hora(hora_lectiva) }})
+                </span>
             {% else %}
                 <span class="fuera-horario">(fuera de horario o recreo)</span>
             {% endif %}
         </p>
 
-        <form method="POST" class="form-presencia">
+        {% if not hora_lectiva %}
+        <p class="fuera-horario-msg">
+            ⚠️ No se puede registrar presencia fuera de horario
+        </p>
+        {% endif %}
 
+        <form method="POST" class="form-presencia">
             <input type="hidden" name="fecha" value="{{ fecha }}">
 
             <div class="presencia-campo">
@@ -89,26 +111,17 @@
                     Cancelar
                 </button>
 
-                <button
-                    id="btn-registro"
-                    type="submit"
-                    class="presencia-btn-guardar"
-                    {% if not hora_lectiva %} disabled {% endif %}
-                >
+                <button id="btn-registro" type="submit" class="presencia-btn-guardar"
+                        {% if not hora_lectiva %} disabled {% endif %}>
                     Registrar paso
                 </button>
             </div>
-
         </form>
 
     </div>
-
 </div>
 
-<!-- 🔥 SCRIPT -->
 <script>
-
-// MODAL
 function abrirModal() {
     document.getElementById("modal-presencia").style.display = "flex";
 }
@@ -117,14 +130,19 @@ function cerrarModal() {
     document.getElementById("modal-presencia").style.display = "none";
 }
 
-// BOTÓN DINÁMICO
 const select = document.getElementById("profesor-select");
 const boton = document.getElementById("btn-registro");
-
-const presentes = {{ presentes_ids | tojson }};
+const presentes = {{ presentes_ids | default([]) | tojson }};
+const horaLectiva = {{ hora_lectiva | default('null') }};
 
 function actualizarBoton() {
     const profesorId = parseInt(select.value);
+
+    if (!horaLectiva) {
+        boton.disabled = true;
+        boton.textContent = "Fuera de horario";
+        return;
+    }
 
     if (!profesorId) {
         boton.disabled = true;
@@ -143,7 +161,6 @@ function actualizarBoton() {
 
 select.addEventListener("change", actualizarBoton);
 actualizarBoton();
-
 </script>
 
 {% endblock %}
