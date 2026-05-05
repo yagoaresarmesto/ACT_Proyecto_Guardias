@@ -14,9 +14,16 @@ from modules.utils.tiempo import obtener_hora_lectiva_actual
 
 app = Flask(__name__)
 
-#MODO TEST
+
+# CONFIGURACIÓN MODO TEST / REAL
+
+
 MODO_TEST = True
-HORA_TEST = 6
+
+# Solo se usan si MODO_TEST = True
+FECHA_TEST = "2026-05-04"
+HORA_TEST = None
+# Si MODO_TEST = False, se usa fecha real y hora real lectiva
 
 
 TRAMOS_HORARIOS = {
@@ -32,24 +39,59 @@ TRAMOS_HORARIOS = {
     10: ("19:00", "20:00"),
 }
 
+
 def obtener_tramo_hora(hora):
     tramo = TRAMOS_HORARIOS.get(hora)
     return f"{tramo[0]} - {tramo[1]}" if tramo else ""
 
 
-
-# GUARDIAS
-@app.route('/guardias')
-def vista_guardias():
-    fecha = request.args.get("fecha", date.today().isoformat())
-    hora_real = datetime.now().strftime("%H:%M")
-    dia_semana = datetime.fromisoformat(fecha).isoweekday()
-
-    # 🔥 HORA ACTUAL
+def obtener_fecha_actual_app():
     if MODO_TEST:
-        hora_actual = HORA_TEST
-    else:
-        hora_actual = obtener_hora_lectiva_actual()
+        return FECHA_TEST
+    return date.today().isoformat()
+
+
+def obtener_hora_actual_app():
+    if MODO_TEST:
+        return HORA_TEST
+    return obtener_hora_lectiva_actual()
+
+
+def obtener_hora_real_app():
+    return datetime.now().strftime("%H:%M")
+
+
+def guardia_esta_pasada(guardia, fecha):
+    fecha_actual = obtener_fecha_actual_app()
+    hora_actual = obtener_hora_actual_app()
+
+    es_fecha_pasada = fecha < fecha_actual
+
+    es_hora_pasada = (
+        fecha == fecha_actual
+        and hora_actual is not None
+        and guardia.hora < hora_actual
+    )
+
+    return es_fecha_pasada or es_hora_pasada
+
+
+@app.route("/")
+def index():
+    return render_template("index.html")
+
+
+# =============================
+# GUARDIAS
+# =============================
+
+@app.route("/guardias")
+def vista_guardias():
+    fecha = request.args.get("fecha", obtener_fecha_actual_app())
+    hora_real = obtener_hora_real_app()
+    dia_semana = datetime.fromisoformat(fecha).isoweekday()
+    hora_actual = obtener_hora_actual_app()
+    fecha_actual = obtener_fecha_actual_app()
 
     generar_guardias(dia_semana, fecha)
     guardias = obtener_guardias(fecha)
@@ -57,11 +99,15 @@ def vista_guardias():
     ranking_por_guardia = {}
 
     for g in guardias:
-        ranking_por_guardia[g.id_guardia] = obtener_ranking_guardia(
-            dia_semana,
-            fecha,
-            g.hora
-        )
+        if guardia_esta_pasada(g, fecha) or g.id_profesor_cubre:
+            ranking_por_guardia[g.id_guardia] = []
+        else:
+            ranking_por_guardia[g.id_guardia] = obtener_ranking_guardia(
+                dia_semana,
+                fecha,
+                g.hora,
+                hora_actual
+            )
 
     profesores = obtener_profesores()
 
@@ -78,53 +124,67 @@ def vista_guardias():
         profesores_dict=profesores_dict,
         obtener_tramo_hora=obtener_tramo_hora,
         hora_actual=hora_actual,
-        fecha_actual=date.today().isoformat(),
-        hora_real = hora_real
+        fecha_actual=fecha_actual,
+        hora_real=hora_real,
     )
 
 
-@app.route('/asignar_guardia', methods=['POST'])
+@app.route("/asignar_guardia", methods=["POST"])
 def asignar_guardia_manual():
-    id_guardia = int(request.form['id_guardia'])
-    profesor_id = request.form.get('profesor_id')
-    fecha = request.form.get('fecha')
+    id_guardia = int(request.form["id_guardia"])
+    profesor_id = request.form.get("profesor_id")
+    fecha = request.form.get("fecha")
 
     if not profesor_id:
-        return redirect(url_for('vista_guardias', fecha=fecha))
+        return redirect(url_for("vista_guardias", fecha=fecha))
+
+    guardias = obtener_guardias(fecha)
+    guardia = next((g for g in guardias if g.id_guardia == id_guardia), None)
+
+    if not guardia:
+        return redirect(url_for("vista_guardias", fecha=fecha))
+
+    if guardia.id_profesor_cubre:
+        return redirect(url_for("vista_guardias", fecha=fecha))
+
+    if guardia_esta_pasada(guardia, fecha):
+        return redirect(url_for("vista_guardias", fecha=fecha))
 
     profesor_id = int(profesor_id)
 
     asignar_guardia(id_guardia, profesor_id)
     sumar_guardia(profesor_id)
 
-    return redirect(url_for('vista_guardias', fecha=fecha))
+    return redirect(url_for("vista_guardias", fecha=fecha))
 
 
+# =============================
 # PRESENCIA
+# =============================
 
-@app.route('/presencia', methods=['GET', 'POST'])
+@app.route("/presencia", methods=["GET", "POST"])
 def vista_presencia():
+    fecha = (
+        request.form.get("fecha")
+        or request.args.get("fecha")
+        or obtener_fecha_actual_app()
+    )
 
-    fecha = request.form.get("fecha") or request.args.get("fecha") or date.today().isoformat()
-    hora_real = datetime.now().strftime("%H:%M")
+    hora_real = obtener_hora_real_app()
+    hora_lectiva = obtener_hora_actual_app()
 
-    if MODO_TEST:
-        hora_lectiva = HORA_TEST
-    else:
-        hora_lectiva = obtener_hora_lectiva_actual()
-
-    if request.method == 'POST':
+    if request.method == "POST":
         profesor_id = request.form.get("profesor_id")
 
         if not profesor_id:
-            return redirect(url_for('vista_presencia', fecha=fecha))
+            return redirect(url_for("vista_presencia", fecha=fecha))
 
-        if not hora_lectiva:
-            return redirect(url_for('vista_presencia', fecha=fecha))
+        if hora_lectiva is None:
+            return redirect(url_for("vista_presencia", fecha=fecha))
 
         registrar_evento(int(profesor_id), fecha, hora_lectiva)
 
-        return redirect(url_for('vista_presencia', fecha=fecha))
+        return redirect(url_for("vista_presencia", fecha=fecha))
 
     profesores = obtener_profesores()
     presencia = obtener_presencia_dia(fecha)
@@ -148,9 +208,9 @@ def vista_presencia():
         fecha=fecha,
         hora_real=hora_real,
         hora_lectiva=hora_lectiva,
-        obtener_tramo_hora=obtener_tramo_hora
+        obtener_tramo_hora=obtener_tramo_hora,
     )
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     app.run(debug=True)

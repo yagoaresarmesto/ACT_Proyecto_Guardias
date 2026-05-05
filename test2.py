@@ -1,160 +1,199 @@
-import random
-from datetime import date, timedelta
+from datetime import date
 
 from modules.db.db_manager import (
-    crear_profesor, obtener_profesores,
+    limpiar_bd_completa,
+    crear_profesor,
+    obtener_profesores,
     crear_horario,
     registrar_evento,
     obtener_guardias,
-    limpiar_bd_completa,
-    sumar_guardia
+    asignar_guardia,
+    sumar_guardia,
 )
 
-from modules.guardias.motor import generar_guardias
+from modules.guardias.motor import generar_guardias, obtener_ranking_guardia
 
 
-# -----------------------------
-# CONFIG
-# -----------------------------
-NUM_PROFESORES = 15
-DIAS_A_SIMULAR = 5
-HORAS = list(range(1, 7))  # mañana
+FECHA = "2026-05-04"  # lunes
+DIA_SEMANA = 1
 
 
-# -----------------------------
-# GENERAR PROFESORES
-# -----------------------------
-def generar_profesores():
-    print("\n--- GENERANDO PROFESORES ---")
+def crear_datos_base():
+    print("\n--- CREANDO DATOS BASE ---")
 
-    for i in range(NUM_PROFESORES):
-        crear_profesor(f"Profesor {i+1}")
+    nombres = [
+        "Ana",
+        "Luis",
+        "Marta",
+        "Carlos",
+        "Elena",
+        "Javier",
+    ]
 
-    print(f"{NUM_PROFESORES} profesores creados")
-
-
-# -----------------------------
-# GENERAR HORARIO ALEATORIO
-# -----------------------------
-def generar_horario():
-    print("\n--- GENERANDO HORARIO ---")
+    for nombre in nombres:
+        crear_profesor(nombre)
 
     profesores = obtener_profesores()
+    ids = {p.nombre: p.id_profesor for p in profesores}
 
-    for p in profesores:
-        for dia in range(1, 6):  # lunes a viernes
-            for hora in HORAS:
+    # Hora 1:
+    # Ana y Luis tienen clase. Ana no viene -> genera guardia.
+    # Marta, Carlos y Elena están libres y pueden cubrir.
+    crear_horario(ids["Ana"], DIA_SEMANA, 1, "clase", "Aula 101")
+    crear_horario(ids["Luis"], DIA_SEMANA, 1, "clase", "Aula 102")
+    crear_horario(ids["Marta"], DIA_SEMANA, 1, "libre")
+    crear_horario(ids["Carlos"], DIA_SEMANA, 1, "libre")
+    crear_horario(ids["Elena"], DIA_SEMANA, 1, "libre")
+    crear_horario(ids["Javier"], DIA_SEMANA, 1, "clase", "Aula 103")
 
-                tipo = random.choice(["clase", "libre"])
+    # Hora 2:
+    # Marta tiene clase y no viene -> genera guardia.
+    # Luis, Carlos y Elena podrían cubrir.
+    crear_horario(ids["Ana"], DIA_SEMANA, 2, "libre")
+    crear_horario(ids["Luis"], DIA_SEMANA, 2, "libre")
+    crear_horario(ids["Marta"], DIA_SEMANA, 2, "clase", "Aula 201")
+    crear_horario(ids["Carlos"], DIA_SEMANA, 2, "libre")
+    crear_horario(ids["Elena"], DIA_SEMANA, 2, "libre")
+    crear_horario(ids["Javier"], DIA_SEMANA, 2, "clase", "Aula 202")
 
-                aula = f"Aula {random.randint(100, 110)}" if tipo == "clase" else None
+    # Hora 3:
+    # Todos los presentes tienen clase o están ausentes -> sin disponibles.
+    crear_horario(ids["Ana"], DIA_SEMANA, 3, "clase", "Aula 301")
+    crear_horario(ids["Luis"], DIA_SEMANA, 3, "clase", "Aula 302")
+    crear_horario(ids["Marta"], DIA_SEMANA, 3, "clase", "Aula 303")
+    crear_horario(ids["Carlos"], DIA_SEMANA, 3, "clase", "Aula 304")
+    crear_horario(ids["Elena"], DIA_SEMANA, 3, "clase", "Aula 305")
+    crear_horario(ids["Javier"], DIA_SEMANA, 3, "clase", "Aula 306")
 
-                crear_horario(p.id_profesor, dia, hora, tipo, aula)
-
-    print("Horario generado")
-
-
-# -----------------------------
-# GENERAR PRESENCIA REALISTA
-# -----------------------------
-def generar_presencia(fecha):
-    print(f"\n--- GENERANDO PRESENCIA {fecha} ---")
-
-    profesores = obtener_profesores()
-
-    for p in profesores:
-
-        # 80% probabilidad de ir al centro
-        if random.random() < 0.8:
-
-            hora_entrada = random.choice(HORAS)
-
-            registrar_evento(p.id_profesor, fecha, hora_entrada, "entrada")
-
-            # 50% probabilidad de salir
-            if random.random() < 0.5:
-                hora_salida = random.choice([h for h in HORAS if h >= hora_entrada])
-                registrar_evento(p.id_profesor, fecha, hora_salida, "salida")
-
-    print("Presencia generada")
+    return ids
 
 
-# -----------------------------
-# GENERAR GUARDIAS
-# -----------------------------
-def generar_guardias_dia(fecha):
-    dia_semana = (date.fromisoformat(fecha).isoweekday())
+def crear_presencias(ids):
+    print("\n--- CREANDO PRESENCIAS ---")
 
-    print(f"\n--- GENERANDO GUARDIAS {fecha} ---")
+    # Ana no ficha: ausente.
+    # Marta ficha entrada y salida: termina ausente.
+    # Javier no ficha: ausente.
+    # Luis, Carlos y Elena están presentes.
 
-    generar_guardias(dia_semana, fecha)
+    registrar_evento(ids["Luis"], FECHA, 1, "entrada")
+    registrar_evento(ids["Carlos"], FECHA, 1, "entrada")
+    registrar_evento(ids["Elena"], FECHA, 1, "entrada")
 
-    guardias = obtener_guardias(fecha)
-
-    print(f"Total guardias: {len(guardias)}")
-
-    for g in guardias[:5]:  # solo muestra 5 para no saturar
-        print(g.aula, g.hora, g.ausente_nombre, g.cubre_nombre)
+    registrar_evento(ids["Marta"], FECHA, 1, "entrada")
+    registrar_evento(ids["Marta"], FECHA, 2, "salida")
 
 
-# -----------------------------
-# SIMULACIÓN COMPLETA
-# -----------------------------
-def simulacion_completa():
-    print("\n============================")
-    print("SIMULACIÓN COMPLETA")
-    print("============================")
+def preparar_ranking(ids):
+    print("\n--- PREPARANDO CONTADORES PARA RANKING ---")
 
-    base = date(2026, 4, 20)
+    # Carlos queda con más guardias acumuladas.
+    sumar_guardia(ids["Carlos"])
+    sumar_guardia(ids["Carlos"])
 
-    for i in range(DIAS_A_SIMULAR):
-        fecha = (base + timedelta(days=i)).isoformat()
+    # Elena queda con una guardia acumulada.
+    sumar_guardia(ids["Elena"])
 
-        generar_presencia(fecha)
-        generar_guardias_dia(fecha)
+    # Luis queda con cero guardias, debería priorizarse si está disponible.
 
 
-# -----------------------------
-# EDGE CASES
-# -----------------------------
-def casos_extremos():
-    print("\n--- CASOS EXTREMOS ---")
-
-    fecha = "2026-05-01"
-
-    profesores = obtener_profesores()
-
-    # Nadie viene
-    print("\nCaso: nadie presente")
-    generar_guardias(1, fecha)
-    print("Guardias:", len(obtener_guardias(fecha)))
-
-    # Todos vienen pero nadie sale
-    print("\nCaso: todos presentes sin salida")
-    for p in profesores:
-        registrar_evento(p.id_profesor, fecha, 1, "entrada")
-
-    generar_guardias(1, fecha)
-    print("Guardias:", len(obtener_guardias(fecha)))
+def mostrar_profesores():
+    print("\n--- PROFESORES ---")
+    for p in obtener_profesores():
+        print(
+            p.id_profesor,
+            p.nombre,
+            "semana:",
+            p.guardias_semana,
+            "acumuladas:",
+            p.guardias_acumuladas,
+        )
 
 
-# -----------------------------
-# MAIN
-# -----------------------------
-if __name__ == "__main__":
+def probar_generacion_guardias():
+    print("\n--- GENERANDO GUARDIAS ---")
+
+    generar_guardias(DIA_SEMANA, FECHA)
+
+    guardias = obtener_guardias(FECHA)
+
+    print(f"\nTotal guardias generadas: {len(guardias)}")
+
+    for g in guardias:
+        print(
+            f"Guardia {g.id_guardia} | "
+            f"Hora {g.hora} | "
+            f"Aula {g.aula} | "
+            f"Ausente: {g.ausente_nombre} | "
+            f"Cubre: {g.cubre_nombre}"
+        )
+
+    return guardias
+
+
+def probar_rankings(guardias):
+    print("\n--- RANKING POR GUARDIA ---")
+
+    for g in guardias:
+        ranking = obtener_ranking_guardia(DIA_SEMANA, FECHA, g.hora)
+
+        print(f"Guardia {g.id_guardia} | Hora {g.hora} | Aula {g.aula}")
+        print("Ranking IDs:", ranking)
+
+
+def probar_asignacion(guardias):
+    print("\n--- ASIGNANDO UNA GUARDIA ---")
+
+    for g in guardias:
+        ranking = obtener_ranking_guardia(DIA_SEMANA, FECHA, g.hora)
+
+        if ranking:
+            profesor_elegido = ranking[0]
+
+            print(
+                f"Asignando guardia {g.id_guardia} "
+                f"al profesor ID {profesor_elegido}"
+            )
+
+            asignar_guardia(g.id_guardia, profesor_elegido)
+            sumar_guardia(profesor_elegido)
+            break
+
+    guardias_actualizadas = obtener_guardias(FECHA)
+
+    print("\n--- GUARDIAS TRAS ASIGNACIÓN ---")
+    for g in guardias_actualizadas:
+        print(
+            f"Guardia {g.id_guardia} | "
+            f"Hora {g.hora} | "
+            f"Aula {g.aula} | "
+            f"Ausente: {g.ausente_nombre} | "
+            f"Cubre: {g.cubre_nombre}"
+        )
+
+
+def main():
+    print("\n==============================")
+    print("TEST CONTROLADO DEL PROYECTO")
+    print("==============================")
 
     limpiar_bd_completa()
 
-    generar_profesores()
-    generar_horario()
+    ids = crear_datos_base()
+    crear_presencias(ids)
+    preparar_ranking(ids)
 
-'''
-    # ranking fake inicial
-    for i in range(1, 6):
-        sumar_guardia(i)
+    mostrar_profesores()
 
-    simulacion_completa()
+    guardias = probar_generacion_guardias()
+    probar_rankings(guardias)
+    #probar_asignacion(guardias)
 
-    casos_extremos()
+    print("\n--- PROFESORES TRAS ASIGNACIÓN ---")
+    mostrar_profesores()
 
-'''
+    print("\nTEST FINALIZADO")
+
+
+if __name__ == "__main__":
+    main()

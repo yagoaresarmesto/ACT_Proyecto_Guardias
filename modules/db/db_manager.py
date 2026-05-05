@@ -181,13 +181,6 @@ def obtener_presentes(fecha):
     return presentes
 
 
-def obtener_presentes_en_hora(fecha, hora):
-    """
-    🔥 Simplificación temporal para guardias
-    """
-    return obtener_presentes(fecha)
-
-
 # AUSENCIAS
 def crear_ausencia(id_profesor, fecha, hora):
     conn = get_connection()

@@ -6,7 +6,6 @@
 
     <h1>Asignación de guardias</h1>
 
-    <!-- 🔥 INFO HORA (NUEVO) -->
     <p class="info-hora">
         Hora actual: {{ hora_real }}
 
@@ -19,7 +18,6 @@
         {% endif %}
     </p>
 
-    <!-- 🔥 FILTRO -->
     <form method="GET" action="/guardias" class="presencia-filtros">
         <div class="grupo-fecha">
             <label>Fecha</label>
@@ -56,8 +54,10 @@
 
                 {% for g in guardias %}
 
+                    {% set es_fecha_pasada = fecha < fecha_actual %}
                     {% set es_hoy = fecha == fecha_actual %}
-                    {% set es_pasada = es_hoy and hora_actual and g.hora < hora_actual %}
+                    {% set es_hora_pasada = es_hoy and hora_actual and g.hora < hora_actual %}
+                    {% set es_pasada = es_fecha_pasada or es_hora_pasada %}
 
                     <tr class="{% if es_pasada %}fila-pasada{% endif %}">
 

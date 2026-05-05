@@ -45,4 +45,4 @@ def obtener_presentes_actuales(fecha):
 
 
 def obtener_presentes_en_hora(fecha, hora):
-    return obtener_presentes(fecha)(fecha)
+    return obtener_presentes(fecha)

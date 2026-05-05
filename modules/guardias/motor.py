@@ -7,16 +7,14 @@ from modules.db.db_manager import (
     obtener_profesores_asignados
 )
 
-from modules.utils.tiempo import obtener_hora_lectiva_actual
 from modules.guardias.reglas import ordenar_por_guardias
 from modules.guardias.models import Guardia as GuardiaDominio
-
-from datetime import date
 
 
 # DETECTAR AUSENCIAS
 def detectar_ausencias(dia_semana, fecha):
     horario = obtener_horario_por_dia(dia_semana)
+    presentes = obtener_presentes(fecha)
     ausencias = []
 
     for h in horario:
@@ -27,8 +25,6 @@ def detectar_ausencias(dia_semana, fecha):
         profesor = h["id_profesor"]
         aula = h["aula"]
 
-        presentes = obtener_presentes(fecha)
-
         if profesor not in presentes:
             ausencia = GuardiaDominio(
                 hora=hora,
@@ -37,7 +33,6 @@ def detectar_ausencias(dia_semana, fecha):
             )
 
             ausencias.append(ausencia)
-
             crear_ausencia(profesor, fecha, hora)
 
     return ausencias
@@ -55,17 +50,13 @@ def crear_guardias_desde_ausencias(ausencias, fecha):
             )
 
 
-# DISPONIBLES (FIX COMPLETO)
-def obtener_disponibles(dia_semana, fecha, hora):
+# DISPONIBLES
+def obtener_disponibles(dia_semana, fecha, hora, hora_actual=None):
     horario = obtener_horario_por_dia(dia_semana)
     presentes = obtener_presentes(fecha)
 
-    hoy = date.today().isoformat()
-
-    if fecha == hoy:
-        hora_actual = obtener_hora_lectiva_actual()
-        if hora_actual and hora < hora_actual:
-            return set()
+    if hora_actual is not None and hora < hora_actual:
+        return set()
 
     ocupados = {
         h["id_profesor"]
@@ -73,7 +64,6 @@ def obtener_disponibles(dia_semana, fecha, hora):
         if h["hora"] == hora and h["tipo"] == "clase"
     }
 
-    # Profesores ya asignados a guardias
     asignados = obtener_profesores_asignados(fecha, hora)
 
     disponibles = presentes - ocupados - asignados
@@ -82,8 +72,13 @@ def obtener_disponibles(dia_semana, fecha, hora):
 
 
 # RANKING
-def obtener_ranking_guardia(dia_semana, fecha, hora):
-    disponibles = obtener_disponibles(dia_semana, fecha, hora)
+def obtener_ranking_guardia(dia_semana, fecha, hora, hora_actual=None):
+    disponibles = obtener_disponibles(
+        dia_semana,
+        fecha,
+        hora,
+        hora_actual
+    )
 
     if not disponibles:
         return []
