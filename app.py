@@ -22,7 +22,7 @@ MODO_TEST = True
 
 # Solo se usan si MODO_TEST = True
 FECHA_TEST = "2026-05-04"
-HORA_TEST = None
+HORA_TEST = 2
 # Si MODO_TEST = False, se usa fecha real y hora real lectiva
 
 
@@ -67,23 +67,25 @@ def guardia_esta_pasada(guardia, fecha):
 
     es_fecha_pasada = fecha < fecha_actual
 
+    es_fuera_de_horario = (
+        fecha == fecha_actual
+        and hora_actual is None
+    )
+
     es_hora_pasada = (
         fecha == fecha_actual
         and hora_actual is not None
         and guardia.hora < hora_actual
     )
 
-    return es_fecha_pasada or es_hora_pasada
+    return es_fecha_pasada or es_fuera_de_horario or es_hora_pasada
 
 
 @app.route("/")
 def index():
     return render_template("index.html")
 
-
-# =============================
 # GUARDIAS
-# =============================
 
 @app.route("/guardias")
 def vista_guardias():

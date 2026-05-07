@@ -56,10 +56,11 @@
 
                     {% set es_fecha_pasada = fecha < fecha_actual %}
                     {% set es_hoy = fecha == fecha_actual %}
+                    {% set fuera_horario = es_hoy and hora_actual is none %}
                     {% set es_hora_pasada = es_hoy and hora_actual and g.hora < hora_actual %}
                     {% set es_pasada = es_fecha_pasada or es_hora_pasada %}
 
-                    <tr class="{% if es_pasada %}fila-pasada{% endif %}">
+                    <tr class="{% if es_pasada or fuera_horario %}fila-pasada{% endif %}">
 
                         <td>
                             <span class="hora-num">{{ g.hora }}ª hora</span>
@@ -80,6 +81,12 @@
 
                                 <span class="asignado">
                                     {{ g.cubre_nombre }}
+                                </span>
+
+                            {% elif fuera_horario %}
+
+                                <span class="guardia-pasada">
+                                    Fuera de horario
                                 </span>
 
                             {% elif es_pasada %}
