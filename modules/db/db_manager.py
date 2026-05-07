@@ -272,6 +272,41 @@ def existe_guardia(fecha, hora, aula):
 
     return resultado is not None
 
+def obtener_horario_profesor(id_profesor):
+    conn = get_connection()
+    cursor = conn.cursor()
+
+    cursor.execute("""
+        SELECT *
+        FROM horario
+        WHERE id_profesor = ?
+        ORDER BY dia_semana, hora
+    """, (id_profesor,))
+
+    data = cursor.fetchall()
+    conn.close()
+    return data
+
+def obtener_guardias_profesor_entre_fechas(id_profesor, fecha_inicio, fecha_fin):
+    conn = get_connection()
+    cursor = conn.cursor()
+
+    cursor.execute("""
+        SELECT g.*,
+               p1.nombre AS ausente_nombre,
+               p2.nombre AS cubre_nombre
+        FROM guardias g
+        LEFT JOIN profesores p1 ON g.id_profesor_ausente = p1.id_profesor
+        LEFT JOIN profesores p2 ON g.id_profesor_cubre = p2.id_profesor
+        WHERE g.id_profesor_cubre = ?
+          AND g.fecha BETWEEN ? AND ?
+        ORDER BY g.fecha, g.hora
+    """, (id_profesor, fecha_inicio, fecha_fin))
+
+    data = cursor.fetchall()
+    conn.close()
+
+    return [Guardia(**g) for g in data]
 
 # LIMPIEZA
 def limpiar_bd_completa():

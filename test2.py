@@ -1,5 +1,3 @@
-from datetime import date
-
 from modules.db.db_manager import (
     limpiar_bd_completa,
     crear_profesor,
@@ -21,14 +19,7 @@ DIA_SEMANA = 1
 def crear_datos_base():
     print("\n--- CREANDO DATOS BASE ---")
 
-    nombres = [
-        "Ana",
-        "Luis",
-        "Marta",
-        "Carlos",
-        "Elena",
-        "Javier",
-    ]
+    nombres = ["Ana", "Luis", "Marta", "Carlos", "Elena", "Javier"]
 
     for nombre in nombres:
         crear_profesor(nombre)
@@ -36,45 +27,109 @@ def crear_datos_base():
     profesores = obtener_profesores()
     ids = {p.nombre: p.id_profesor for p in profesores}
 
-    # Hora 1:
-    # Ana y Luis tienen clase. Ana no viene -> genera guardia.
-    # Marta, Carlos y Elena están libres y pueden cubrir.
-    crear_horario(ids["Ana"], DIA_SEMANA, 1, "clase", "Aula 101")
-    crear_horario(ids["Luis"], DIA_SEMANA, 1, "clase", "Aula 102")
+    # Luis se crea aparte con horario completo para evitar duplicados.
+
+    # Hora 1
+    crear_horario(ids["Ana"], DIA_SEMANA, 1, "clase", "1ESO-A / Aula 101")
     crear_horario(ids["Marta"], DIA_SEMANA, 1, "libre")
     crear_horario(ids["Carlos"], DIA_SEMANA, 1, "libre")
     crear_horario(ids["Elena"], DIA_SEMANA, 1, "libre")
-    crear_horario(ids["Javier"], DIA_SEMANA, 1, "clase", "Aula 103")
+    crear_horario(ids["Javier"], DIA_SEMANA, 1, "clase", "2ESO-B / Aula 103")
 
-    # Hora 2:
-    # Marta tiene clase y no viene -> genera guardia.
-    # Luis, Carlos y Elena podrían cubrir.
+    # Hora 2
     crear_horario(ids["Ana"], DIA_SEMANA, 2, "libre")
-    crear_horario(ids["Luis"], DIA_SEMANA, 2, "libre")
-    crear_horario(ids["Marta"], DIA_SEMANA, 2, "clase", "Aula 201")
+    crear_horario(ids["Marta"], DIA_SEMANA, 2, "clase", "3ESO-A / Aula 201")
     crear_horario(ids["Carlos"], DIA_SEMANA, 2, "libre")
     crear_horario(ids["Elena"], DIA_SEMANA, 2, "libre")
-    crear_horario(ids["Javier"], DIA_SEMANA, 2, "clase", "Aula 202")
+    crear_horario(ids["Javier"], DIA_SEMANA, 2, "clase", "4ESO-C / Aula 202")
 
-    # Hora 3:
-    # Todos los presentes tienen clase o están ausentes -> sin disponibles.
-    crear_horario(ids["Ana"], DIA_SEMANA, 3, "clase", "Aula 301")
-    crear_horario(ids["Luis"], DIA_SEMANA, 3, "clase", "Aula 302")
-    crear_horario(ids["Marta"], DIA_SEMANA, 3, "clase", "Aula 303")
-    crear_horario(ids["Carlos"], DIA_SEMANA, 3, "clase", "Aula 304")
-    crear_horario(ids["Elena"], DIA_SEMANA, 3, "clase", "Aula 305")
-    crear_horario(ids["Javier"], DIA_SEMANA, 3, "clase", "Aula 306")
+    # Hora 3
+    crear_horario(ids["Ana"], DIA_SEMANA, 3, "clase", "1BAC-A / Aula 301")
+    crear_horario(ids["Marta"], DIA_SEMANA, 3, "clase", "2BAC-B / Aula 303")
+    crear_horario(ids["Carlos"], DIA_SEMANA, 3, "clase", "FPB-1 / Aula 304")
+    crear_horario(ids["Elena"], DIA_SEMANA, 3, "clase", "3ESO-C / Aula 305")
+    crear_horario(ids["Javier"], DIA_SEMANA, 3, "clase", "FP2 / Aula 306")
 
     return ids
 
 
+def crear_horario_completo_luis(ids):
+    print("\n--- CREANDO HORARIO COMPLETO PARA LUIS ---")
+
+    luis = ids["Luis"]
+
+    horario_luis = {
+        1: {
+            1: ("clase", "1ESO-A / Aula 102"),
+            2: ("clase", "2ESO-B / Aula 205"),
+            3: ("guardia", "Guardia"),
+            4: ("libre", None),
+            5: ("clase", "3ESO-C / Aula 301"),
+            6: ("clase", "4ESO-A / Aula 104"),
+            7: ("libre", None),
+            8: ("guardia", "Guardia"),
+            9: ("libre", None),
+            10: ("libre", None),
+        },
+        2: {
+            1: ("guardia", "Guardia"),
+            2: ("clase", "1BAC-A / Aula 210"),
+            3: ("clase", "2ESO-A / Aula 203"),
+            4: ("libre", None),
+            5: ("clase", "3ESO-B / Aula 302"),
+            6: ("guardia", "Guardia"),
+            7: ("libre", None),
+            8: ("libre", None),
+            9: ("clase", "FPB-1 / Aula 401"),
+            10: ("libre", None),
+        },
+        3: {
+            1: ("clase", "4ESO-B / Aula 106"),
+            2: ("libre", None),
+            3: ("guardia", "Guardia"),
+            4: ("clase", "1ESO-C / Aula 103"),
+            5: ("clase", "2BAC-A / Aula 211"),
+            6: ("libre", None),
+            7: ("guardia", "Guardia"),
+            8: ("libre", None),
+            9: ("libre", None),
+            10: ("clase", "FP2 / Aula 402"),
+        },
+        4: {
+            1: ("libre", None),
+            2: ("clase", "3ESO-A / Aula 300"),
+            3: ("clase", "1BAC-B / Aula 212"),
+            4: ("guardia", "Guardia"),
+            5: ("libre", None),
+            6: ("clase", "4ESO-C / Aula 107"),
+            7: ("libre", None),
+            8: ("guardia", "Guardia"),
+            9: ("clase", "FP1 / Aula 403"),
+            10: ("libre", None),
+        },
+        5: {
+            1: ("clase", "2ESO-C / Aula 204"),
+            2: ("guardia", "Guardia"),
+            3: ("libre", None),
+            4: ("clase", "1ESO-B / Aula 101"),
+            5: ("clase", "3ESO-C / Aula 301"),
+            6: ("libre", None),
+            7: ("guardia", "Guardia"),
+            8: ("libre", None),
+            9: ("libre", None),
+            10: ("libre", None),
+        },
+    }
+
+    for dia_semana, horas in horario_luis.items():
+        for hora, (tipo, aula) in horas.items():
+            crear_horario(luis, dia_semana, hora, tipo, aula)
+
+    print("Horario completo de Luis creado")
+
+
 def crear_presencias(ids):
     print("\n--- CREANDO PRESENCIAS ---")
-
-    # Ana no ficha: ausente.
-    # Marta ficha entrada y salida: termina ausente.
-    # Javier no ficha: ausente.
-    # Luis, Carlos y Elena están presentes.
 
     registrar_evento(ids["Luis"], FECHA, 1, "entrada")
     registrar_evento(ids["Carlos"], FECHA, 1, "entrada")
@@ -87,14 +142,10 @@ def crear_presencias(ids):
 def preparar_ranking(ids):
     print("\n--- PREPARANDO CONTADORES PARA RANKING ---")
 
-    # Carlos queda con más guardias acumuladas.
     sumar_guardia(ids["Carlos"])
     sumar_guardia(ids["Carlos"])
 
-    # Elena queda con una guardia acumulada.
     sumar_guardia(ids["Elena"])
-
-    # Luis queda con cero guardias, debería priorizarse si está disponible.
 
 
 def mostrar_profesores():
@@ -180,6 +231,7 @@ def main():
     limpiar_bd_completa()
 
     ids = crear_datos_base()
+    crear_horario_completo_luis(ids)
     crear_presencias(ids)
     preparar_ranking(ids)
 
@@ -187,7 +239,9 @@ def main():
 
     guardias = probar_generacion_guardias()
     probar_rankings(guardias)
-    #probar_asignacion(guardias)
+
+    # Actívalo solo si quieres probar asignación automática desde consola.
+    # probar_asignacion(guardias)
 
     print("\n--- PROFESORES TRAS ASIGNACIÓN ---")
     mostrar_profesores()

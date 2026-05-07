@@ -87,6 +87,7 @@ td {
     padding: 12px;
     border-bottom: 1px solid #eee;
     font-size: 15px;
+    vertical-align: middle;
 }
 
 tr:hover {
@@ -95,7 +96,6 @@ tr:hover {
 
 /* FORMULARIOS */
 
-/* 🔥 SOLO PARA FORMULARIOS INLINE (NO GLOBAL) */
 .form-inline {
     display: flex;
     gap: 10px;
@@ -177,8 +177,6 @@ select {
    PRESENCIA
 ============================= */
 
-/* HEADER */
-
 .header-presencia {
     display: flex;
     justify-content: space-between;
@@ -186,35 +184,35 @@ select {
     margin-bottom: 20px;
 }
 
-/* FORM FECHA */
-
 .presencia-filtros {
     display: flex;
     align-items: flex-end;
     gap: 15px;
-    margin: 0;
+    margin: 0 0 24px 0;
+    flex-wrap: wrap;
 }
 
 .grupo-fecha {
     display: flex;
     flex-direction: column;
+    gap: 5px;
 }
 
 .grupo-fecha label {
-    margin-bottom: 5px;
     color: #555;
     font-size: 14px;
 }
 
-.grupo-fecha input {
-    height: 38px;
+.grupo-fecha input,
+.grupo-fecha select {
+    height: 42px;
     padding: 6px 10px;
     border-radius: 6px;
     border: 1px solid #ccc;
     font-size: 14px;
+    background-color: white;
+    box-sizing: border-box;
 }
-
-/* BOTÓN REGISTRAR */
 
 .btn-abrir-modal {
     height: 38px;
@@ -229,8 +227,6 @@ select {
 .btn-abrir-modal:hover {
     background-color: #218838;
 }
-
-/* EVENTOS */
 
 .presencia-evento {
     display: inline-block;
@@ -263,8 +259,6 @@ select {
 .form-presencia select {
     height: 36px;
 }
-
-/* BOTÓN GUARDAR */
 
 .presencia-btn-guardar {
     height: 36px;
@@ -311,6 +305,63 @@ select {
 }
 
 /* =============================
+   HORARIOS
+============================= */
+
+.horario-header {
+    margin-bottom: 18px;
+}
+
+.horario-header h2 {
+    margin-bottom: 6px;
+}
+
+.tabla-horarios {
+    min-width: 850px;
+    table-layout: fixed;
+}
+
+.tabla-horarios th,
+.tabla-horarios td {
+    text-align: center;
+}
+
+.tabla-horarios th:first-child,
+.tabla-horarios td:first-child {
+    width: 95px;
+    text-align: left;
+}
+
+.celda-horario {
+    display: block;
+    width: 100%;
+    max-width: 120px;
+    margin: 0 auto;
+    padding: 6px 8px;
+    border-radius: 6px;
+    background-color: #eaf3ff;
+    color: #0056b3;
+    font-size: 12px;
+    font-weight: 600;
+    line-height: 1.25;
+    white-space: normal;
+    overflow-wrap: break-word;
+    word-break: normal;
+    box-sizing: border-box;
+}
+
+.celda-guardia {
+    background-color: #fff3cd;
+    color: #856404;
+}
+
+.celda-libre {
+    color: #999;
+    font-style: italic;
+    font-size: 13px;
+}
+
+/* =============================
    MODAL
 ============================= */
 
@@ -324,6 +375,7 @@ select {
     display: none;
     justify-content: center;
     align-items: center;
+    z-index: 1000;
 }
 
 .modal {
@@ -333,6 +385,7 @@ select {
     border-radius: 12px;
     padding: 20px 22px;
     box-shadow: 0 10px 30px rgba(0,0,0,0.15);
+    z-index: 1001;
 }
 
 .modal h3 {
@@ -352,14 +405,6 @@ select {
     justify-content: flex-end;
     gap: 10px;
     margin-top: 15px;
-}
-
-.modal-overlay {
-    z-index: 1000;
-}
-
-.modal {
-    z-index: 1001;
 }
 
 .btn-cerrar {

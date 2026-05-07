@@ -10,6 +10,7 @@ from modules.db.db_manager import (
 )
 
 from modules.presencia.registro import obtener_presencia_dia, registrar_evento
+from modules.horarios.servicio import construir_tabla_horario, DIAS, HORAS
 from modules.utils.tiempo import obtener_hora_lectiva_actual
 
 app = Flask(__name__)
@@ -18,7 +19,7 @@ app = Flask(__name__)
 # CONFIGURACIÓN MODO TEST / REAL
 
 
-MODO_TEST = True
+MODO_TEST = False
 
 # Solo se usan si MODO_TEST = True
 FECHA_TEST = "2026-05-04"
@@ -213,6 +214,48 @@ def vista_presencia():
         obtener_tramo_hora=obtener_tramo_hora,
     )
 
+# HORARIOS
+@app.route("/horarios")
+def vista_horarios():
+    profesores = obtener_profesores()
+
+    fecha = request.args.get(
+        "fecha",
+        obtener_fecha_actual_app()
+    )
+
+    profesor_id = request.args.get("profesor_id")
+
+    profesor_seleccionado = None
+    tabla_horario = None
+    fecha_inicio = None
+    fecha_fin = None
+
+    if profesor_id:
+        profesor_id = int(profesor_id)
+
+        profesor_seleccionado = next(
+            (p for p in profesores if p.id_profesor == profesor_id),
+            None
+        )
+
+        tabla_horario, fecha_inicio, fecha_fin = construir_tabla_horario(
+            profesor_id,
+            fecha
+        )
+
+    return render_template(
+        "vista_horarios.html",
+        profesores=profesores,
+        profesor_seleccionado=profesor_seleccionado,
+        tabla_horario=tabla_horario,
+        dias=DIAS,
+        horas=HORAS,
+        fecha=fecha,
+        fecha_inicio=fecha_inicio,
+        fecha_fin=fecha_fin,
+        obtener_tramo_hora=obtener_tramo_hora,
+    )
 
 if __name__ == "__main__":
     app.run(debug=True)
