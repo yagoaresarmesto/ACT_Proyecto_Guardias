@@ -1,6 +1,7 @@
 from flask import Flask, render_template, request, redirect, url_for
 from datetime import date, datetime
 
+from config import MODO_TEST, FECHA_TEST, HORA_TEST
 from modules.guardias.motor import generar_guardias, obtener_ranking_guardia
 from modules.db.db_manager import (
     obtener_guardias,
@@ -14,18 +15,6 @@ from modules.horarios.servicio import construir_tabla_horario, DIAS, HORAS
 from modules.utils.tiempo import obtener_hora_lectiva_actual
 
 app = Flask(__name__)
-
-
-# CONFIGURACIÓN MODO TEST / REAL
-
-
-MODO_TEST = False
-
-# Solo se usan si MODO_TEST = True
-FECHA_TEST = "2026-05-04"
-HORA_TEST = 2
-# Si MODO_TEST = False, se usa fecha real y hora real lectiva
-
 
 TRAMOS_HORARIOS = {
     1: ("08:50", "09:40"),

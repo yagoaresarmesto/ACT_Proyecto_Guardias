@@ -1,12 +1,12 @@
 import sqlite3
-from modules.db.models import Profesor, Guardia
 
-DB_NAME = "ies.db"
+from config import DB_PATH
+from modules.db.models import Profesor, Guardia
 
 
 # CONEXIÓN
 def get_connection():
-    conn = sqlite3.connect(DB_NAME)
+    conn = sqlite3.connect(DB_PATH)
     conn.row_factory = sqlite3.Row
     return conn
 
@@ -34,6 +34,7 @@ def obtener_profesores():
 
     conn.close()
     return [Profesor(**p) for p in profesores]
+
 
 def obtener_profesores_asignados(fecha, hora):
     conn = get_connection()
@@ -65,6 +66,7 @@ def sumar_guardia(id_profesor):
     conn.commit()
     conn.close()
 
+
 # HORARIO
 def crear_horario(id_profesor, dia_semana, hora, tipo, aula=None):
     conn = get_connection()
@@ -95,7 +97,8 @@ def obtener_horario_por_dia(dia_semana):
     cursor = conn.cursor()
 
     cursor.execute("""
-        SELECT * FROM horario
+        SELECT *
+        FROM horario
         WHERE dia_semana = ?
     """, (dia_semana,))
 
@@ -103,6 +106,21 @@ def obtener_horario_por_dia(dia_semana):
     conn.close()
     return data
 
+
+def obtener_horario_profesor(id_profesor):
+    conn = get_connection()
+    cursor = conn.cursor()
+
+    cursor.execute("""
+        SELECT *
+        FROM horario
+        WHERE id_profesor = ?
+        ORDER BY dia_semana, hora
+    """, (id_profesor,))
+
+    data = cursor.fetchall()
+    conn.close()
+    return data
 
 
 # PRESENCIA
@@ -124,7 +142,8 @@ def obtener_eventos(fecha):
     cursor = conn.cursor()
 
     cursor.execute("""
-        SELECT * FROM presencia
+        SELECT *
+        FROM presencia
         WHERE fecha = ?
         ORDER BY hora
     """, (fecha,))
@@ -139,7 +158,8 @@ def obtener_ultimo_evento(id_profesor, fecha):
     cursor = conn.cursor()
 
     cursor.execute("""
-        SELECT * FROM presencia
+        SELECT *
+        FROM presencia
         WHERE id_profesor = ? AND fecha = ?
         ORDER BY hora DESC
         LIMIT 1
@@ -152,8 +172,8 @@ def obtener_ultimo_evento(id_profesor, fecha):
 
 def obtener_presentes(fecha):
     """
-    Devuelve profesores que están actualmente dentro
-    (último evento = entrada)
+    Devuelve los profesores actualmente presentes.
+    Un profesor se considera presente si su último evento del día es 'entrada'.
     """
     conn = get_connection()
     cursor = conn.cursor()
@@ -200,14 +220,14 @@ def obtener_ausencias(fecha):
     cursor = conn.cursor()
 
     cursor.execute("""
-        SELECT * FROM ausencias
+        SELECT *
+        FROM ausencias
         WHERE fecha = ?
     """, (fecha,))
 
     data = cursor.fetchall()
     conn.close()
     return data
-
 
 
 # GUARDIAS
@@ -243,7 +263,7 @@ def obtener_guardias(fecha):
     cursor = conn.cursor()
 
     cursor.execute("""
-        SELECT g.*, 
+        SELECT g.*,
                p1.nombre AS ausente_nombre,
                p2.nombre AS cubre_nombre
         FROM guardias g
@@ -257,35 +277,6 @@ def obtener_guardias(fecha):
     conn.close()
     return [Guardia(**g) for g in data]
 
-
-def existe_guardia(fecha, hora, aula):
-    conn = get_connection()
-    cursor = conn.cursor()
-
-    cursor.execute("""
-        SELECT 1 FROM guardias
-        WHERE fecha = ? AND hora = ? AND aula = ?
-    """, (fecha, hora, aula))
-
-    resultado = cursor.fetchone()
-    conn.close()
-
-    return resultado is not None
-
-def obtener_horario_profesor(id_profesor):
-    conn = get_connection()
-    cursor = conn.cursor()
-
-    cursor.execute("""
-        SELECT *
-        FROM horario
-        WHERE id_profesor = ?
-        ORDER BY dia_semana, hora
-    """, (id_profesor,))
-
-    data = cursor.fetchall()
-    conn.close()
-    return data
 
 def obtener_guardias_profesor_entre_fechas(id_profesor, fecha_inicio, fecha_fin):
     conn = get_connection()
@@ -308,6 +299,23 @@ def obtener_guardias_profesor_entre_fechas(id_profesor, fecha_inicio, fecha_fin)
 
     return [Guardia(**g) for g in data]
 
+
+def existe_guardia(fecha, hora, aula):
+    conn = get_connection()
+    cursor = conn.cursor()
+
+    cursor.execute("""
+        SELECT 1
+        FROM guardias
+        WHERE fecha = ? AND hora = ? AND aula = ?
+    """, (fecha, hora, aula))
+
+    resultado = cursor.fetchone()
+    conn.close()
+
+    return resultado is not None
+
+
 # LIMPIEZA
 def limpiar_bd_completa():
     conn = get_connection()
@@ -318,7 +326,6 @@ def limpiar_bd_completa():
     cursor.execute("DELETE FROM guardias")
     cursor.execute("DELETE FROM horario")
     cursor.execute("DELETE FROM profesores")
-
     cursor.execute("DELETE FROM sqlite_sequence")
 
     conn.commit()
