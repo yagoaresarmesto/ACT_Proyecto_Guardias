@@ -1,125 +1,308 @@
 # Lógica del sistema
 
-## Detección de ausencias
+El sistema de gestión de guardias se basa en comparar:
 
-El sistema compara:
+- la planificación teórica del centro
+- la situación real del profesorado
 
-- Horarios → profesores que deberían estar
-- Presencia → profesores que han fichado
-
-La diferencia entre ambos determina los profesores ausentes.
-
-Ejemplo:
-
-HORARIO = {1, 2, 3}  
-PRESENCIA = {1, 3}  
-
-Resultado: AUSENTES = {2}
+A partir de esa comparación, el sistema detecta automáticamente incidencias y genera las guardias necesarias.
 
 ---
 
-## Motor de guardias (fase inicial)
+# Objetivos del sistema
 
-El sistema comienza a generar guardias a partir de las ausencias detectadas.
+El sistema busca:
 
-### 1. Aulas sin profesor
-
-Se detectan las aulas que quedan sin profesor cuando un docente con horario no está presente.
-
-Ejemplo:
-
-- Profesor 2 tiene clase en Aula 102 a la hora 2
-- No ha registrado presencia
-
-Resultado:
-- Aula 102 necesita guardia
+- Detectar clases sin profesor
+- Determinar qué profesores están disponibles
+- Generar guardias automáticamente
+- Proponer candidatos ordenados por prioridad
+- Permitir asignación manual desde la interfaz web
 
 ---
 
-### 2. Profesores disponibles
+# Arquitectura lógica
 
-Un profesor se considera disponible si:
-
-- Está presente en el centro
-- No tiene clase asignada en esa hora
-
-Cálculo:
-
-DISPONIBLES = PRESENTES - OCUPADOS
-
-Ejemplo:
-
-PRESENTES = {1, 3}  
-OCUPADOS = {3}  
-
-Resultado: DISPONIBLES = {1}
+El sistema se divide en varias capas funcionales.
 
 ---
 
-## Ejemplo completo de funcionamiento
+## Capa de datos (`db`)
 
-Se ha probado el sistema con el siguiente escenario:
+Responsable de:
 
-### Profesores
-- Profesor 1
-- Profesor 2
-- Profesor 3
+- consultas SQL
+- persistencia
+- transformación de datos
 
-### Horarios
-- Profesor 1 → Lunes, hora 1 → Aula 101
-- Profesor 2 → Lunes, hora 2 → Aula 102
-- Profesor 3 → Lunes, hora 2 → Aula 103
+Archivo principal:
 
-### Presencia
-- Profesor 1 → presente
-- Profesor 3 → presente
-- Profesor 2 → ausente
+```text
+db_manager.py
+```
 
 ---
 
-### Resultado del sistema
+## Capa de lógica (`guardias`)
 
-#### 1. Ausencias detectadas
-Profesores ausentes:
+Responsable de:
 
-{2}
+- detectar ausencias
+- generar guardias
+- calcular disponibilidad
+- aplicar ranking
 
----
+Archivos principales:
 
-#### 2. Aulas sin profesor
-
-[('Aula 102', 2)]
-
----
-
-#### 3. Profesores disponibles
-
-Profesores presentes:
-
-{1, 3}
-
-Profesores ocupados en hora 2:
-
-{3}
-
-Profesores disponibles:
-
-{1}
+```text
+motor.py
+reglas.py
+```
 
 ---
 
-#### 4. Ranking de profesores
+## Capa de presencia (`presencia`)
 
-[(1, 'Profesor 1', 0, 0)]
+Responsable de:
+
+- registrar entradas y salidas
+- calcular presencia actual
+- determinar profesores presentes
+
+Archivo principal:
+
+```text
+registro.py
+```
 
 ---
 
-### Conclusión
+## Capa de horarios (`horarios`)
 
-El sistema identifica correctamente:
+Responsable de:
 
-- Qué profesor está ausente
-- Qué aula necesita cobertura
-- Qué profesor puede cubrir la guardia
+- construir horarios semanales
+- mezclar horarios fijos y guardias reales
+- preparar tablas para la interfaz
 
-Este flujo constituye la base del motor de guardias.
+Archivo principal:
+
+```text
+servicio.py
+```
+
+---
+
+## Capa de presentación (`Flask`)
+
+Responsable de:
+
+- rutas web
+- renderizado HTML
+- interacción con el usuario
+
+Archivo principal:
+
+```text
+app.py
+```
+
+---
+
+# Flujo general del sistema
+
+El funcionamiento principal sigue este orden:
+
+```text
+Horario → Presencia → Ausencias → Guardias → Ranking → Asignación
+```
+
+---
+
+# 1. Horario
+
+El sistema consulta el horario semanal planificado.
+
+La tabla `horario` contiene:
+
+- profesor
+- día
+- hora
+- tipo
+- aula
+
+Actualmente se utilizan principalmente:
+
+- `clase`
+- `libre`
+
+Solo las entradas `clase` generan posibles ausencias.
+
+---
+
+# 2. Presencia
+
+La presencia se basa en eventos de:
+
+- entrada
+- salida
+
+Cada profesor puede registrar múltiples eventos durante el día.
+
+El sistema considera presente a un profesor cuando su último evento es:
+
+```text
+entrada
+```
+
+---
+
+# 3. Detección de ausencias
+
+Un profesor se considera ausente cuando:
+
+- tiene una clase planificada
+- no aparece como presente
+
+Las ausencias se generan automáticamente desde `motor.py`.
+
+---
+
+# 4. Generación de guardias
+
+Por cada ausencia detectada:
+
+- se crea una guardia
+- se almacena aula y hora
+- se registra el profesor ausente
+
+Antes de crearla, el sistema comprueba si ya existe una guardia equivalente para evitar duplicados.
+
+---
+
+# 5. Profesores disponibles
+
+Un profesor se considera disponible cuando:
+
+- está presente
+- no tiene clase en esa hora
+- no está cubriendo ya otra guardia
+
+Los profesores ocupados son aquellos que tienen:
+
+```text
+tipo = "clase"
+```
+
+en esa hora.
+
+---
+
+# 6. Ranking de prioridad
+
+Para cada guardia:
+
+1. Se obtiene la lista de profesores disponibles
+2. Se aplica un sistema de prioridad
+
+El resultado es una lista ordenada de candidatos.
+
+---
+
+# Criterios de prioridad
+
+Los profesores se ordenan por:
+
+1. Menor número de guardias acumuladas
+2. Menor número de guardias en la semana actual
+3. Menor carga lectiva semanal
+4. Menor ID de profesor en caso de empate
+
+Esto permite repartir las guardias de forma equilibrada.
+
+---
+
+# 7. Asignación de guardias
+
+La asignación se realiza manualmente desde la interfaz web.
+
+El sistema muestra:
+
+- guardias pendientes
+- profesores disponibles
+- ranking ordenado
+
+Cuando una guardia se asigna:
+
+- se registra el profesor que cubre
+- se actualizan sus contadores
+
+---
+
+# Horarios semanales
+
+La vista `/horarios` permite consultar:
+
+- horario semanal de cada profesor
+- clases asignadas
+- horas libres
+- guardias reales cubiertas
+
+El horario fijo depende únicamente de:
+
+- día de la semana
+- hora
+
+Las guardias reales sí dependen de fechas concretas.
+
+---
+
+# Modo test
+
+La aplicación incorpora un sistema de simulación temporal.
+
+Desde `app.py` pueden configurarse:
+
+```python
+MODO_TEST = True
+FECHA_TEST = "2026-05-04"
+HORA_TEST = 1
+```
+
+Esto permite probar:
+
+- horas pasadas
+- recreos
+- fuera de horario
+- fechas futuras
+- generación de guardias
+
+sin depender de la hora real.
+
+---
+
+# Validaciones del sistema
+
+El sistema protege tanto frontend como backend.
+
+Ejemplos:
+
+- no asignar guardias pasadas
+- bloquear fuera de horario
+- evitar duplicados
+- impedir asignaciones inválidas
+
+---
+
+# Estado actual
+
+Actualmente el sistema permite:
+
+- registrar presencia
+- detectar ausencias
+- generar guardias automáticamente
+- asignar coberturas
+- consultar horarios
+- probar distintos escenarios mediante modo test
+
+El siguiente paso previsto es integrar hardware externo para automatizar el registro de presencia mediante Pi Camera.

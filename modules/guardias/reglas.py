@@ -1,43 +1,70 @@
-from db.db_manager import obtener_profesores, obtener_horarios
+from modules.db.db_manager import (
+    obtener_profesores,
+    obtener_horario
+)
 
+from modules.guardias.models import ProfesorDisponible
 
-def ordenar_por_guardias(disponibles):
-    profesores = obtener_profesores()
-    horarios = obtener_horarios()
-
+def calcular_carga_lectiva():
+    horario = obtener_horario()
     carga = {}
 
-    # Calculo de la carga lectiva
-    for h in horarios:
-        profesor_id = h[1]
-        carga[profesor_id] = carga.get(profesor_id, 0) + 1
+    for h in horario:
+        if h["tipo"] != "clase":
+            continue
 
-    # Filtrar solo los disponibles
-    profesores_disponibles = [
-        p for p in profesores if p[0] in disponibles
-    ]
+        profesor_id = h["id_profesor"]
 
-    # Ordenar por:
-    # 1. guardias acumuladas
-    # 2. guardias semana
-    # 3. carga lectiva
+        if profesor_id not in carga:
+            carga[profesor_id] = 0
 
-    profesores_ordenados = sorted(
-        profesores_disponibles,
+        carga[profesor_id] += 1
+
+    return carga
+
+def construir_profesores_disponibles(profesores_ids):
+    profesores = obtener_profesores()
+    carga_lectiva = calcular_carga_lectiva()
+
+    disponibles = []
+
+    for p in profesores:
+        if p.id_profesor not in profesores_ids:
+            continue
+
+        disponible = ProfesorDisponible(
+            id_profesor=p.id_profesor,
+            guardias_acumuladas=p.guardias_acumuladas,
+            guardias_semana=p.guardias_semana,
+            carga_lectiva=carga_lectiva.get(p.id_profesor, 0)
+        )
+
+        disponibles.append(disponible)
+
+    return disponibles
+
+def ordenar_por_guardias(profesores_ids):
+    """
+    Ordena profesores según:
+    1. guardias acumuladas
+    2. guardias en la semana
+    3. carga lectiva
+    4. id (en caso de empate)
+    """
+
+    if not profesores_ids:
+        return []
+
+    disponibles = construir_profesores_disponibles(profesores_ids)
+
+    disponibles_ordenados = sorted(
+        disponibles,
         key=lambda p: (
-            p[2],                      # guardias acumuladas
-            p[3],                      # guardias semana
-            carga.get(p[0], 0)         # carga lectiva
+            p.guardias_acumuladas,
+            p.guardias_semana,
+            p.carga_lectiva,
+            p.id_profesor
         )
     )
 
-    return profesores_ordenados
-
-#Ejemplo de orden:
-
-'''
-(0, 0, 2) → mejor
-(0, 0, 3)
-(0, 1, 1)
-(1, 0, 1) → peor
-'''
+    return [p.id_profesor for p in disponibles_ordenados]

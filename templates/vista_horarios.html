@@ -1,0 +1,112 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<div class="container">
+
+    <h1>Horario del profesorado</h1>
+
+    <form method="GET" action="/horarios" class="presencia-filtros">
+
+        <div class="grupo-fecha">
+            <label>Profesor</label>
+
+            <select name="profesor_id" onchange="this.form.requestSubmit()">
+                <option value="">-- Seleccionar profesor --</option>
+
+                {% for p in profesores %}
+                    <option value="{{ p.id_profesor }}"
+                        {% if profesor_seleccionado and profesor_seleccionado.id_profesor == p.id_profesor %}
+                            selected
+                        {% endif %}
+                    >
+                        {{ p.nombre }}
+                    </option>
+                {% endfor %}
+            </select>
+        </div>
+
+        <div class="grupo-fecha">
+            <label>Semana</label>
+
+            <input
+                type="date"
+                name="fecha"
+                value="{{ fecha }}"
+                onchange="this.form.requestSubmit()"
+            >
+        </div>
+
+    </form>
+
+    {% if profesor_seleccionado %}
+
+        <div class="horario-header">
+            <h2>{{ profesor_seleccionado.nombre }}</h2>
+
+            {% if fecha_inicio and fecha_fin %}
+                <p class="info-hora">
+                    Semana del {{ fecha_inicio }} al {{ fecha_fin }}
+                </p>
+            {% endif %}
+        </div>
+
+        <div class="tabla-wrapper">
+
+            <table class="tabla-horarios">
+                <thead>
+                    <tr>
+                        <th>Hora</th>
+
+                        {% for dia_num, dia_nombre in dias.items() %}
+                            <th>{{ dia_nombre }}</th>
+                        {% endfor %}
+                    </tr>
+                </thead>
+
+                <tbody>
+
+                    {% for hora in horas %}
+                        <tr>
+                            <td>
+                                <span class="hora-num">{{ hora }}ª</span>
+                                <br>
+                                <span class="hora-tramo">
+                                    {{ obtener_tramo_hora(hora) }}
+                                </span>
+                            </td>
+
+                            {% for dia_num, dia_nombre in dias.items() %}
+                                <td>
+                                    {% set valor = tabla_horario[hora][dia_num] %}
+
+                                    {% if valor %}
+                                        <span class="celda-horario {% if 'Guardia' in valor %}celda-guardia{% endif %}">
+                                            {{ valor }}
+                                        </span>
+                                    {% else %}
+                                        <span class="celda-libre">
+                                            Libre
+                                        </span>
+                                    {% endif %}
+                                </td>
+                            {% endfor %}
+                        </tr>
+                    {% endfor %}
+
+                </tbody>
+            </table>
+
+        </div>
+
+    {% else %}
+
+        <p class="sin-guardias">
+            Selecciona un profesor para ver su horario.
+        </p>
+
+    {% endif %}
+
+</div>
+
+{% endblock %}

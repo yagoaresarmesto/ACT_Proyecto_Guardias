@@ -1,96 +1,98 @@
-from db.db_manager import obtener_horarios, obtener_presencia, obtener_guardia, obtener_profesor_por_id
+from modules.db.db_manager import (
+    obtener_horario_por_dia,
+    obtener_presentes,
+    crear_ausencia,
+    crear_guardia,
+    existe_guardia,
+    obtener_profesores_asignados
+)
+
 from modules.guardias.reglas import ordenar_por_guardias
+from modules.guardias.models import Guardia as GuardiaDominio
 
-def obtener_aulas_sin_profesor(dia, fecha):
-    # Obtener datos desde db_manager
-    horarios = obtener_horarios()
-    presencia = obtener_presencia()
 
-    # Profesores presentes
-    profesores_presentes = {p[1] for p in presencia if p[2] == fecha}
+# DETECTAR AUSENCIAS
+def detectar_ausencias(dia_semana, fecha):
+    horario = obtener_horario_por_dia(dia_semana)
+    presentes = obtener_presentes(fecha)
+    ausencias = []
 
-    aulas_sin_profesor = []
+    for h in horario:
+        if h["tipo"] != "clase":
+            continue
 
-    for horario in horarios:
-        _, profesor_id, dia_h, hora, aula = horario
+        hora = h["hora"]
+        profesor = h["id_profesor"]
+        aula = h["aula"]
 
-        if dia_h == dia and profesor_id not in profesores_presentes:
-            aulas_sin_profesor.append((aula, hora))
+        if profesor not in presentes:
+            ausencia = GuardiaDominio(
+                hora=hora,
+                aula=aula,
+                id_profesor_ausente=profesor
+            )
 
-    return aulas_sin_profesor
+            ausencias.append(ausencia)
+            crear_ausencia(profesor, fecha, hora)
 
-def obtener_profesores_disponibles(dia, hora, fecha):
-    horarios = obtener_horarios()
-    presencia = obtener_presencia()
+    return ausencias
 
-    # Profesores presentes
-    profesores_presentes = {p[1] for p in presencia if p[2] == fecha}
 
-    # Profesores ocupados en esa hora
-    profesores_ocupados = {
-        h[1] for h in horarios if h[2] == dia and h[3] == hora
+# CREAR GUARDIAS
+def crear_guardias_desde_ausencias(ausencias, fecha):
+    for a in ausencias:
+        if not existe_guardia(fecha, a.hora, a.aula):
+            crear_guardia(
+                fecha,
+                a.hora,
+                a.aula,
+                a.id_profesor_ausente
+            )
+
+
+# DISPONIBLES
+def obtener_disponibles(dia_semana, fecha, hora, hora_actual=None):
+    horario = obtener_horario_por_dia(dia_semana)
+    presentes = obtener_presentes(fecha)
+
+    if hora_actual is not None and hora < hora_actual:
+        return set()
+
+    ocupados = {
+        h["id_profesor"]
+        for h in horario
+        if h["hora"] == hora and h["tipo"] == "clase"
     }
 
-    # Disponibles = presentes - ocupados
-    disponibles = profesores_presentes - profesores_ocupados
+    asignados = obtener_profesores_asignados(fecha, hora)
+
+    disponibles = presentes - ocupados - asignados
 
     return disponibles
 
 
-#Asignar guardias
-def asignar_guardias(dia, fecha):
-    aulas = obtener_aulas_sin_profesor(dia, fecha)
+# RANKING
+def obtener_ranking_guardia(dia_semana, fecha, hora, hora_actual=None):
+    disponibles = obtener_disponibles(
+        dia_semana,
+        fecha,
+        hora,
+        hora_actual
+    )
 
-    resultado = []
-    profesores_usados = set()
+    if not disponibles:
+        return []
 
-    for aula, hora in aulas:
-        disponibles = obtener_profesores_disponibles(dia, hora, fecha)
+    return ordenar_por_guardias(disponibles)
 
-        disponibles = disponibles - profesores_usados
 
-        if not disponibles:
-            resultado.append((aula, hora, None))
-            continue
+# GENERAR GUARDIAS
+def generar_guardias(dia_semana, fecha):
+    print("\n--- AUSENCIAS DETECTADAS ---")
 
-        ranking = ordenar_por_guardias(disponibles)
+    ausencias = detectar_ausencias(dia_semana, fecha)
 
-        profesor_asignado = ranking[0]
+    for a in ausencias:
+        print(a.hora, a.aula, a.id_profesor_ausente)
 
-        resultado.append((aula, hora, profesor_asignado))
-
-        profesores_usados.add(profesor_asignado[0])
-
-    return resultado
-
-def obtener_guardias_para_vista(dia, fecha):
-    aulas = obtener_aulas_sin_profesor(dia, fecha)
-
-    resultado = []
-
-    for aula, hora in aulas:
-        guardia = obtener_guardia(aula, hora, fecha)
-
-        #YA ASIGNADA
-        if guardia:
-            profesor = obtener_profesor_por_id(guardia)
-
-            resultado.append({
-                "aula": aula,
-                "hora": hora,
-                "asignada": True,
-                "profesor": profesor
-            })
-
-        else:
-            disponibles = obtener_profesores_disponibles(dia, hora, fecha)
-            ranking = ordenar_por_guardias(disponibles)
-
-            resultado.append({
-                "aula": aula,
-                "hora": hora,
-                "asignada": False,
-                "profesores": ranking
-            })
-
-    return resultado
+    crear_guardias_desde_ausencias(ausencias, fecha)
