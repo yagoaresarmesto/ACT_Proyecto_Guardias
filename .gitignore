@@ -223,3 +223,8 @@ misc.xml
 modules.xml
 profile_settings.xml
 vcs.xml
+
+# Bases de datos locales
+*.db
+*.sqlite3
+*.sqlite
