@@ -36,6 +36,37 @@ def obtener_profesores():
     return [Profesor(**p) for p in profesores]
 
 
+def obtener_profesor_por_id(id_profesor):
+    conn = get_connection()
+    cursor = conn.cursor()
+
+    cursor.execute("""
+        SELECT *
+        FROM profesores
+        WHERE id_profesor = ?
+    """, (id_profesor,))
+
+    data = cursor.fetchone()
+    conn.close()
+
+    if data is None:
+        return None
+
+    return Profesor(**data)
+
+def actualizar_rfid_uid_profesor(id_profesor, rfid_uid):
+    conn = get_connection()
+    cursor = conn.cursor()
+
+    cursor.execute("""
+        UPDATE profesores
+        SET rfid_uid = ?
+        WHERE id_profesor = ?
+    """, (rfid_uid, id_profesor))
+
+    conn.commit()
+    conn.close()
+
 def obtener_profesores_asignados(fecha, hora):
     conn = get_connection()
     cursor = conn.cursor()
@@ -50,7 +81,6 @@ def obtener_profesores_asignados(fecha, hora):
     conn.close()
 
     return data
-
 
 def sumar_guardia(id_profesor):
     conn = get_connection()
