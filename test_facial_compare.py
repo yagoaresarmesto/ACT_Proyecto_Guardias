@@ -1,36 +1,19 @@
-import os
 import sys
 import cv2
+import numpy as np
 
 
 CASCADE_PATH = "/usr/share/opencv4/haarcascades/haarcascade_frontalface_default.xml"
+UMBRAL = 20
 
-
-def generar_ruta_salida(ruta_imagen):
-    carpeta = os.path.dirname(ruta_imagen)
-    nombre = os.path.basename(ruta_imagen)
-
-    nombre_sin_ext, extension = os.path.splitext(nombre)
-
-    return os.path.join(
-        carpeta,
-        f"{nombre_sin_ext}_detectada{extension}"
-    )
-
-
-def detectar_caras(ruta_imagen):
+def detectar_y_recortar_cara(ruta_imagen):
     clasificador = cv2.CascadeClassifier(CASCADE_PATH)
-
-    if clasificador.empty():
-        print("No se pudo cargar el clasificador Haar.")
-        print("Ruta:", CASCADE_PATH)
-        return
 
     imagen = cv2.imread(ruta_imagen)
 
     if imagen is None:
-        print("No se pudo cargar la imagen.")
-        return
+        print(f"No se pudo cargar: {ruta_imagen}")
+        return None
 
     gris = cv2.cvtColor(imagen, cv2.COLOR_BGR2GRAY)
 
@@ -41,34 +24,48 @@ def detectar_caras(ruta_imagen):
         minSize=(80, 80)
     )
 
-    print(f"Caras detectadas: {len(caras)}")
-
     if len(caras) == 0:
-        print("No se detectó cara.")
+        print(f"No se detectó cara en: {ruta_imagen}")
+        return None
+
+    # Usamos la primera cara detectada
+    x, y, w, h = caras[0]
+
+    cara = gris[y:y+h, x:x+w]
+
+    # Normalizamos tamaño
+    cara = cv2.resize(cara, (200, 200))
+
+    return cara
+
+
+def comparar_caras(ruta_ref, ruta_check):
+    cara_ref = detectar_y_recortar_cara(ruta_ref)
+    cara_check = detectar_y_recortar_cara(ruta_check)
+
+    if cara_ref is None or cara_check is None:
+        print("No se pudo comparar.")
         return
 
-    print("Detección correcta.")
+    # Diferencia absoluta entre imágenes
+    diferencia = cv2.absdiff(cara_ref, cara_check)
 
-    for (x, y, w, h) in caras:
-        cv2.rectangle(
-            imagen,
-            (x, y),
-            (x + w, y + h),
-            (0, 255, 0),
-            3
-        )
+    # Media de diferencia
+    score = np.mean(diferencia)
 
-    ruta_salida = generar_ruta_salida(ruta_imagen)
+    print(f"Score de diferencia: {score:.2f}")
 
-    cv2.imwrite(ruta_salida, imagen)
-
-    print(f"Imagen con detección guardada en: {ruta_salida}")
+    # Cuanto más bajo, más parecidas
+    if score < UMBRAL:
+        print("RESULTADO: Probablemente la misma persona")
+    else:
+        print("RESULTADO: Personas diferentes")
 
 
 if __name__ == "__main__":
-    if len(sys.argv) != 2:
+    if len(sys.argv) != 3:
         print("Uso:")
-        print("python test_facial_compare.py ruta_imagen")
+        print("python test_facial_compare.py ref.jpg check.jpg")
         sys.exit(1)
 
-    detectar_caras(sys.argv[1])
+    comparar_caras(sys.argv[1], sys.argv[2])
