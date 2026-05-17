@@ -71,7 +71,7 @@
 </div>
 
 <div id="modal-presencia" class="modal-overlay">
-    <div class="modal">
+    <div class="modal modal-presencia-amplio">
 
         <h3>Registrar presencia</h3>
 
@@ -106,6 +106,13 @@
                 </select>
             </div>
 
+            <div id="instrucciones-facial" class="instrucciones-facial">
+                <p class="instrucciones-titulo">Selecciona un profesor</p>
+                <p class="instrucciones-texto">
+                    El sistema te indicará si se realizará un primer registro facial o una verificación.
+                </p>
+            </div>
+
             <div class="modal-actions">
                 <button type="button" class="btn-cerrar" onclick="cerrarModal()">
                     Cancelar
@@ -132,8 +139,83 @@ function cerrarModal() {
 
 const select = document.getElementById("profesor-select");
 const boton = document.getElementById("btn-registro");
+const instrucciones = document.getElementById("instrucciones-facial");
+
 const presentes = {{ presentes_ids | default([]) | tojson }};
 const horaLectiva = {{ hora_lectiva | default('null') }};
+
+const referenciasFaciales = {
+    {% for p in profesores %}
+        "{{ p.id_profesor }}": {{ "true" if p.rfid_uid else "false" }}{% if not loop.last %},{% endif %}
+    {% endfor %}
+};
+
+function actualizarInstrucciones(profesorId) {
+    if (!profesorId) {
+        instrucciones.innerHTML = `
+            <p class="instrucciones-titulo">Selecciona un profesor</p>
+            <p class="instrucciones-texto">
+                El sistema te indicará si se realizará un primer registro facial o una verificación.
+            </p>
+        `;
+        return;
+    }
+
+    const tieneReferencia = referenciasFaciales[String(profesorId)];
+
+    if (!tieneReferencia) {
+        instrucciones.innerHTML = `
+            <p class="instrucciones-titulo">Primer registro facial</p>
+
+            <div class="pasos-facial">
+                <div class="paso-facial">
+                    <strong>1</strong>
+                    <span>Mira de frente a la cámara</span>
+                </div>
+
+                <div class="paso-facial">
+                    <strong>2</strong>
+                    <span>Cambia ligeramente el ángulo de la cara</span>
+                </div>
+
+                <div class="paso-facial">
+                    <strong>3</strong>
+                    <span>Mantén buena iluminación</span>
+                </div>
+
+                <div class="paso-facial">
+                    <strong>4</strong>
+                    <span>Se capturarán varias referencias faciales</span>
+                </div>
+            </div>
+
+            <p class="instrucciones-texto">
+                Este primer registro no ficha la entrada todavía. Después tendrás que registrar de nuevo para verificarte.
+            </p>
+        `;
+    } else {
+        instrucciones.innerHTML = `
+            <p class="instrucciones-titulo">Verificación facial</p>
+
+            <div class="pasos-facial">
+                <div class="paso-facial">
+                    <strong>1</strong>
+                    <span>Colócate frente a la cámara</span>
+                </div>
+
+                <div class="paso-facial">
+                    <strong>2</strong>
+                    <span>El sistema comprobará tu identidad automáticamente</span>
+                </div>
+
+                <div class="paso-facial">
+                    <strong>3</strong>
+                    <span>Si coincide, se registrará la entrada o salida</span>
+                </div>
+            </div>
+        `;
+    }
+}
 
 function actualizarBoton() {
     const profesorId = parseInt(select.value);
@@ -141,12 +223,14 @@ function actualizarBoton() {
     if (!horaLectiva) {
         boton.disabled = true;
         boton.textContent = "Fuera de horario";
+        actualizarInstrucciones(profesorId);
         return;
     }
 
     if (!profesorId) {
         boton.disabled = true;
         boton.textContent = "Registrar paso";
+        actualizarInstrucciones(null);
         return;
     }
 
@@ -157,6 +241,8 @@ function actualizarBoton() {
     } else {
         boton.textContent = "Registrar entrada";
     }
+
+    actualizarInstrucciones(profesorId);
 }
 
 select.addEventListener("change", actualizarBoton);

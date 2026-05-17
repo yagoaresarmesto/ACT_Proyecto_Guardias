@@ -7,8 +7,8 @@ from modules.db.db_manager import (
 )
 
 from modules.presencia.facial import (
-    capturar_referencia_profesor,
-    capturar_verificacion_profesor,
+    registrar_referencias_profesor,
+    verificar_profesor_en_vivo,
 )
 
 
@@ -22,37 +22,37 @@ def registrar_evento(profesor_id, fecha, hora):
         print("Profesor no encontrado")
         return False
 
-    # Si no tiene referencia facial, se crea
+    # Si no tiene referencias faciales, se crean varias
     if not profesor.rfid_uid:
-        print(f"Profesor {profesor.nombre} sin referencia facial.")
-        print("Capturando foto de referencia...")
+        print(f"Profesor {profesor.nombre} sin referencias faciales.")
+        print("Iniciando registro facial...")
 
-        ruta_referencia = capturar_referencia_profesor(profesor_id)
+        ruta_encodings = registrar_referencias_profesor(profesor_id)
+
+        if not ruta_encodings:
+            print("No se pudo crear referencia facial.")
+            return False
 
         actualizar_rfid_uid_profesor(
             profesor_id,
-            ruta_referencia
+            ruta_encodings
         )
 
-        print("Referencia facial guardada.")
+        print("Referencias faciales guardadas.")
         print("Vuelve a registrar presencia para verificar.")
 
         return False
 
-    # Si ya tiene referencia, capturamos foto de verificación
-    print(f"Profesor {profesor.nombre} con referencia facial.")
-    print("Capturando foto de verificación...")
+    # Si ya tiene referencias, verificamos en vivo
+    print(f"Profesor {profesor.nombre} con referencias faciales.")
+    print("Iniciando verificaci�n en vivo...")
 
-    ruta_verificacion = capturar_verificacion_profesor(profesor_id)
-
-    print("Foto de verificación guardada:", ruta_verificacion)
-
-    # De momento aceptamos siempre.
-    # Más adelante aquí irá la comparación facial real.
-    verificado = True
+    verificado = verificar_profesor_en_vivo(
+        profesor.rfid_uid
+    )
 
     if not verificado:
-        print("Verificación facial fallida.")
+        print("Verificaci�n facial fallida.")
         return False
 
     eventos = obtener_eventos(fecha)

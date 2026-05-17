@@ -414,3 +414,54 @@ select {
     padding: 8px 14px;
     cursor: pointer;
 }
+
+.modal-presencia-amplio {
+    width: 420px;
+}
+
+.instrucciones-facial {
+    margin-top: 12px;
+    padding: 14px;
+    background-color: #f8fafc;
+    border: 1px solid #e3e6ea;
+    border-radius: 10px;
+}
+
+.instrucciones-titulo {
+    margin: 0 0 10px 0;
+    font-weight: 700;
+    color: #333;
+}
+
+.instrucciones-texto {
+    margin: 8px 0 0 0;
+    font-size: 13px;
+    color: #666;
+    line-height: 1.4;
+}
+
+.pasos-facial {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.paso-facial {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 13px;
+    color: #444;
+}
+
+.paso-facial strong {
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    background: #007bff;
+    color: white;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 12px;
+}
