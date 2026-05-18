@@ -1,6 +1,12 @@
 # Base de datos
 
-El sistema utiliza una base de datos relacional SQLite para modelar la gestión de presencia, ausencias y guardias de un centro educativo.
+El sistema utiliza SQLite como base de datos relacional para gestionar:
+
+- horarios
+- presencia
+- ausencias
+- guardias
+- reconocimiento facial
 
 La base de datos separa claramente:
 
@@ -29,6 +35,8 @@ Representa la planificación semanal del profesorado.
 
 Representa la situación real del profesorado en cada momento.
 
+La presencia se registra mediante reconocimiento facial utilizando Raspberry Pi Camera.
+
 ---
 
 ## Ausencias
@@ -54,9 +62,15 @@ Almacena la información básica del profesorado.
 | id_profesor | INTEGER | Identificador único |
 | nombre | TEXT | Nombre del profesor |
 | departamento | TEXT | Departamento |
-| rfid_uid | TEXT | Identificador RFID opcional |
+| rfid_uid | TEXT | Ruta a referencias faciales |
 | guardias_semana | INTEGER | Número de guardias en la semana |
 | guardias_acumuladas | INTEGER | Total histórico de guardias |
+
+### Observación
+
+Se llama `rfid_uid` puede confundir el nombre, no es más conveniente.
+
+Actualmente se reutiliza para almacenar la ruta al archivo de referencias faciales (`encodings.pkl`).
 
 ---
 
@@ -80,7 +94,7 @@ Actualmente el sistema utiliza principalmente:
 - `clase`
 - `libre`
 
-El tipo `guardia` sigue soportado por la base de datos, aunque no se utiliza activamente en la lógica actual.
+El tipo `guardia` sigue soportado por la base de datos, aunque no se utiliza activamente en la lógica actual, ya que consideré que está distinción puede ser confusa.
 
 ---
 
@@ -159,10 +173,37 @@ Una ausencia pertenece a un profesor concreto.
 
 ## profesores ↔ guardias
 
-La tabla guardias relaciona:
+La tabla `guardias` relaciona:
 
 - profesor ausente
 - profesor que cubre
+
+---
+
+# Reconocimiento facial
+
+El reconocimiento facial funciona mediante:
+
+- `face_recognition`
+- `dlib`
+- `OpenCV`
+- `Picamera2`
+
+Cada profesor dispone de múltiples referencias de caras.
+
+Las referencias se almacenan en:
+
+```text
+static/faces/
+```
+
+Cada carpeta de profesor contiene:
+
+```text
+encodings.pkl
+```
+
+El sistema utiliza múltiples encodings para mejorar la robustez del reconocimiento.
 
 ---
 
@@ -174,24 +215,32 @@ El sistema obtiene el horario del día correspondiente.
 
 ---
 
-## 2. Consulta de presencia
+## 2. Verificación facial
 
-Se obtiene la lista de profesores presentes.
+El profesor se identifica mediante reconocimiento facial en vivo.
 
 ---
 
-## 3. Detección de ausencias
+## 3. Registro de presencia
+
+Si la identidad coincide:
+
+- se registra entrada o salida automáticamente
+
+---
+
+## 4. Detección de ausencias
 
 Si un profesor:
 
 - tiene clase
-- y no está presente
+- y no aparece como presente
 
 se genera una ausencia.
 
 ---
 
-## 4. Generación de guardias
+## 5. Generación de guardias
 
 Por cada ausencia detectada:
 
@@ -200,7 +249,7 @@ Por cada ausencia detectada:
 
 ---
 
-## 5. Asignación de cobertura
+## 6. Asignación de cobertura
 
 El sistema propone profesores disponibles y permite asignar manualmente la cobertura.
 
@@ -218,6 +267,18 @@ Esto permite detectar incidencias automáticamente.
 
 ---
 
+## Arquitectura modular
+
+La lógica se separa en módulos independientes:
+
+- presencia
+- guardias
+- horarios
+- reconocimiento facial
+- acceso a datos
+
+---
+
 ## Registro histórico
 
 Las guardias y ausencias quedan almacenadas para permitir:
@@ -232,10 +293,11 @@ Las guardias y ausencias quedan almacenadas para permitir:
 
 La estructura permite futuras ampliaciones como:
 
-- RFID
-- reconocimiento facial
-- integración hardware
-- automatización de presencia
+- RFID real
+- múltiples cámaras
+- reconocimiento distribuido
+- estadísticas avanzadas
+- automatización completa
 
 ---
 
@@ -246,7 +308,8 @@ El sistema utiliza:
 - claves foráneas
 - restricciones `CHECK`
 - validaciones desde Flask
-- control de duplicados en guardias
+- control de duplicados
+- verificación facial obligatoria
 
 ---
 
@@ -256,8 +319,9 @@ Actualmente la base de datos soporta:
 
 - gestión de horarios
 - registro de presencia
+- reconocimiento facial en vivo
 - generación automática de guardias
 - ranking de profesores
 - visualización de horarios semanales
 
-El siguiente paso previsto es integrar presencia automática mediante hardware externo.
+El sistema ya funciona integrado con Raspberry Pi Camera y reconocimiento facial.

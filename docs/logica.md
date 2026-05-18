@@ -7,17 +7,20 @@ El sistema de gestión de guardias se basa en comparar:
 
 A partir de esa comparación, el sistema detecta automáticamente incidencias y genera las guardias necesarias.
 
+Actualmente la presencia se obtiene mediante reconocimiento facial utilizando Raspberry Pi Camera.
+
 ---
 
 # Objetivos del sistema
 
 El sistema busca:
 
-- Detectar clases sin profesor
-- Determinar qué profesores están disponibles
-- Generar guardias automáticamente
-- Proponer candidatos ordenados por prioridad
-- Permitir asignación manual desde la interfaz web
+- detectar clases sin profesor
+- verificar identidad mediante reconocimiento facial
+- determinar qué profesores están disponibles
+- generar guardias automáticamente
+- proponer candidatos ordenados por prioridad
+- permitir asignación manual desde la interfaz web
 
 ---
 
@@ -68,11 +71,14 @@ Responsable de:
 - registrar entradas y salidas
 - calcular presencia actual
 - determinar profesores presentes
+- reconocimiento facial
+- integración con Pi Camera
 
-Archivo principal:
+Archivos principales:
 
 ```text
 registro.py
+facial.py
 ```
 
 ---
@@ -114,7 +120,19 @@ app.py
 El funcionamiento principal sigue este orden:
 
 ```text
-Horario → Presencia → Ausencias → Guardias → Ranking → Asignación
+Horario
+↓
+Verificación facial
+↓
+Presencia
+↓
+Ausencias
+↓
+Guardias
+↓
+Ranking
+↓
+Asignación
 ```
 
 ---
@@ -140,7 +158,41 @@ Solo las entradas `clase` generan posibles ausencias.
 
 ---
 
-# 2. Presencia
+# 2. Verificación facial
+
+El profesor se identifica mediante reconocimiento facial en vivo.
+
+El sistema utiliza:
+
+- `face_recognition`
+- `dlib`
+- `OpenCV`
+- `Picamera2`
+
+## Primer registro
+
+La primera vez:
+
+1. Se capturan múltiples referencias faciales
+2. Se generan encodings
+3. Se almacenan en disco
+
+Cada profesor dispone de varias referencias para mejorar la precisión.
+
+---
+
+## Verificación posterior
+
+En los siguientes accesos:
+
+1. La cámara captura imagen en vivo
+2. Se detecta el rostro
+3. Se comparan encodings faciales
+4. Si coincide, se registra presencia
+
+---
+
+# 3. Presencia
 
 La presencia se basa en eventos de:
 
@@ -155,9 +207,11 @@ El sistema considera presente a un profesor cuando su último evento es:
 entrada
 ```
 
+El registro de presencia se realiza automáticamente tras validación facial correcta.
+
 ---
 
-# 3. Detección de ausencias
+# 4. Detección de ausencias
 
 Un profesor se considera ausente cuando:
 
@@ -168,7 +222,7 @@ Las ausencias se generan automáticamente desde `motor.py`.
 
 ---
 
-# 4. Generación de guardias
+# 5. Generación de guardias
 
 Por cada ausencia detectada:
 
@@ -180,7 +234,7 @@ Antes de crearla, el sistema comprueba si ya existe una guardia equivalente para
 
 ---
 
-# 5. Profesores disponibles
+# 6. Profesores disponibles
 
 Un profesor se considera disponible cuando:
 
@@ -198,7 +252,7 @@ en esa hora.
 
 ---
 
-# 6. Ranking de prioridad
+# 7. Ranking de prioridad
 
 Para cada guardia:
 
@@ -213,16 +267,16 @@ El resultado es una lista ordenada de candidatos.
 
 Los profesores se ordenan por:
 
-1. Menor número de guardias acumuladas
-2. Menor número de guardias en la semana actual
-3. Menor carga lectiva semanal
-4. Menor ID de profesor en caso de empate
+1. menor número de guardias acumuladas
+2. menor número de guardias en la semana actual
+3. menor carga lectiva semanal
+4. menor ID de profesor en caso de empate
 
 Esto permite repartir las guardias de forma equilibrada.
 
 ---
 
-# 7. Asignación de guardias
+# 8. Asignación de guardias
 
 La asignación se realiza manualmente desde la interfaz web.
 
@@ -261,7 +315,7 @@ Las guardias reales sí dependen de fechas concretas.
 
 La aplicación incorpora un sistema de simulación temporal.
 
-Desde `app.py` pueden configurarse:
+Desde `config.py` pueden configurarse:
 
 ```python
 MODO_TEST = True
@@ -291,6 +345,7 @@ Ejemplos:
 - bloquear fuera de horario
 - evitar duplicados
 - impedir asignaciones inválidas
+- impedir registro sin validación facial
 
 ---
 
@@ -298,11 +353,12 @@ Ejemplos:
 
 Actualmente el sistema permite:
 
-- registrar presencia
+- registrar presencia mediante reconocimiento facial
 - detectar ausencias
 - generar guardias automáticamente
 - asignar coberturas
 - consultar horarios
 - probar distintos escenarios mediante modo test
+- integración completa con Raspberry Pi Camera
 
-El siguiente paso previsto es integrar hardware externo para automatizar el registro de presencia mediante Pi Camera.
+El sistema ya funciona integrado tanto a nivel software como hardware.

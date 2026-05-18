@@ -3,6 +3,7 @@
 Aplicación desarrollada en Python utilizando Flask y SQLite para gestionar:
 
 - Presencia del profesorado
+- Reconocimiento facial
 - Detección automática de ausencias
 - Generación de guardias
 - Asignación manual de coberturas
@@ -10,10 +11,10 @@ Aplicación desarrollada en Python utilizando Flask y SQLite para gestionar:
 
 El sistema simula el funcionamiento real de un centro educativo, diferenciando entre:
 
-- Planificación teórica (horario)
-- Situación real diaria (presencia)
-- Incidencias detectadas (ausencias)
-- Soluciones aplicadas (guardias)
+- planificación teórica (horario)
+- situación real diaria (presencia)
+- incidencias detectadas (ausencias)
+- soluciones aplicadas (guardias)
 
 ---
 
@@ -24,6 +25,10 @@ El sistema simula el funcionamiento real de un centro educativo, diferenciando e
 - SQLite
 - HTML + CSS
 - Jinja2
+- OpenCV
+- face_recognition
+- dlib
+- Picamera2
 
 ---
 
@@ -33,7 +38,45 @@ El sistema simula el funcionamiento real de un centro educativo, diferenciando e
 
 El sistema permite registrar entradas y salidas del profesorado durante cada hora lectiva.
 
-La presencia se utiliza posteriormente para detectar automáticamente qué profesores están ausentes.
+La presencia se registra mediante reconocimiento facial utilizando Raspberry Pi Camera.
+
+El sistema soporta:
+
+- registro inicial de referencias faciales
+- verificación facial en vivo
+- detección automática de identidad
+- registro automático de entrada/salida
+
+---
+
+## Reconocimiento facial
+
+El sistema utiliza:
+
+- `face_recognition`
+- `dlib`
+- `OpenCV`
+- `Picamera2`
+
+Flujo principal:
+
+```text
+Primer registro
+↓
+Captura de múltiples referencias faciales
+↓
+Generación de encodings
+↓
+Guardado de referencias
+
+Siguientes accesos
+↓
+Verificación facial en vivo
+↓
+Registro automático de presencia
+```
+
+Cada profesor dispone de múltiples referencias faciales almacenadas para mejorar la precisión del reconocimiento.
 
 ---
 
@@ -41,8 +84,8 @@ La presencia se utiliza posteriormente para detectar automáticamente qué profe
 
 El motor compara:
 
-- El horario planificado
-- La presencia real registrada
+- el horario planificado
+- la presencia real registrada
 
 Cuando un profesor tiene clase pero no está presente, el sistema genera automáticamente una ausencia y crea una guardia pendiente de cubrir.
 
@@ -54,10 +97,10 @@ Las guardias pueden asignarse manualmente desde la interfaz web.
 
 El sistema propone automáticamente profesores disponibles teniendo en cuenta:
 
-- Presencia actual
-- Profesores ocupados
-- Guardias ya asignadas
-- Ranking de prioridad
+- presencia actual
+- profesores ocupados
+- guardias ya asignadas
+- ranking de prioridad
 
 ---
 
@@ -67,11 +110,11 @@ Cada profesor puede consultar su horario semanal desde la vista `/horarios`.
 
 La vista permite:
 
-- Seleccionar profesor
-- Consultar cualquier semana
-- Ver clases asignadas
-- Ver horas libres
-- Visualizar guardias reales asignadas
+- seleccionar profesor
+- consultar cualquier semana
+- ver clases asignadas
+- ver horas libres
+- visualizar guardias reales asignadas
 
 ---
 
@@ -79,10 +122,10 @@ La vista permite:
 
 La aplicación incorpora un modo test que permite simular:
 
-- Fechas concretas
-- Horas lectivas
-- Recreos
-- Fuera de horario
+- fechas concretas
+- horas lectivas
+- recreos
+- fuera de horario
 
 Esto facilita probar distintos escenarios sin depender de la hora real del sistema.
 
@@ -93,12 +136,23 @@ Esto facilita probar distintos escenarios sin depender de la hora real del siste
 El proyecto sigue una arquitectura modular:
 
 - `app.py` → rutas Flask y coordinación general
+- `config.py` → configuración global
 - `modules/db` → acceso a datos
 - `modules/guardias` → lógica de generación y ranking
-- `modules/presencia` → control de presencia
+- `modules/presencia` → control de presencia y reconocimiento facial
 - `modules/horarios` → construcción de horarios
 - `templates` → interfaz HTML
-- `static` → estilos CSS
+- `static` → recursos estáticos y referencias faciales
+
+---
+
+# Hardware utilizado
+
+El sistema ha sido probado utilizando:
+
+- Raspberry Pi 5
+- Raspberry Pi OS
+- Raspberry Pi Camera Module 3
 
 ---
 
@@ -106,10 +160,11 @@ El proyecto sigue una arquitectura modular:
 
 Actualmente el sistema permite:
 
-- Registrar presencia manualmente
-- Generar guardias automáticamente
-- Asignar coberturas
-- Consultar horarios
-- Simular distintos escenarios mediante modo test
+- registrar presencia mediante reconocimiento facial
+- generar guardias automáticamente
+- asignar coberturas
+- consultar horarios
+- simular distintos escenarios mediante modo test
+- integración completa con Raspberry Pi Camera
 
-El siguiente objetivo del proyecto es integrar registro automático de presencia mediante hardware externo (Pi Camera).
+El sistema ya funciona integrado tanto a nivel software como hardware.

@@ -21,6 +21,8 @@ Flask (interfaz web)
 Servicios y lógica de negocio
         ↓
 Acceso a datos (SQLite)
+        ↓
+Integración hardware (Pi Camera)
 ```
 
 ---
@@ -31,19 +33,20 @@ Acceso a datos (SQLite)
 project/
 │
 ├── app.py
+├── config.py
 │
 ├── modules/
 │   ├── db/
 │   ├── guardias/
-│   ├── presencia/
 │   ├── horarios/
+│   ├── presencia/
 │   └── utils/
 │
 ├── templates/
 ├── static/
+│   └── faces/
 │
-├── test2.py
-└── requirements.txt
+└── test2.py
 ```
 
 ---
@@ -55,9 +58,9 @@ Archivo principal de Flask.
 Se encarga de:
 
 - Definir rutas web
-- Coordinar los módulos
-- Gestionar el modo test
-- Renderizar las vistas HTML
+- Coordinar módulos
+- Gestionar modo test
+- Renderizar vistas HTML
 
 Principales rutas:
 
@@ -67,6 +70,30 @@ Principales rutas:
 | `/presencia` | Gestión de presencia |
 | `/guardias` | Gestión de guardias |
 | `/horarios` | Consulta de horarios |
+
+---
+
+# config.py
+
+Archivo central de configuración del proyecto.
+
+Responsabilidad:
+
+- Configuración global
+- Variables de entorno
+- Parámetros del reconocimiento facial
+- Configuración de testing
+
+Ejemplo:
+
+```python
+MODO_TEST = True
+FECHA_TEST = "2026-05-04"
+HORA_TEST = 1
+
+NUM_REFERENCIAS_FACIALES = 5
+TOLERANCIA_RECONOCIMIENTO = 0.5
+```
 
 ---
 
@@ -80,9 +107,9 @@ modules/db/
 
 Responsabilidad:
 
-- Acceso a base de datos SQLite
+- Acceso a SQLite
 - Consultas SQL
-- Transformación de filas en objetos Python
+- Conversión de filas en objetos Python
 
 Archivo principal:
 
@@ -120,7 +147,7 @@ Archivos:
 | Archivo | Función |
 |---|---|
 | `motor.py` | Lógica principal |
-| `reglas.py` | Ordenación y ranking |
+| `reglas.py` | Ranking y ordenación |
 | `models.py` | Clases de dominio |
 
 ---
@@ -135,15 +162,60 @@ modules/presencia/
 
 Responsabilidad:
 
-- Registrar entradas y salidas
-- Consultar presencia actual
-- Determinar profesores presentes
+- Registro de entradas y salidas
+- Presencia actual
+- Reconocimiento facial
+- Integración con Pi Camera
 
-Archivo principal:
+Archivos principales:
+
+| Archivo | Función |
+|---|---|
+| `registro.py` | Flujo principal de presencia |
+| `facial.py` | Captura y verificación facial |
+
+---
+
+# Reconocimiento facial
+
+El sistema utiliza:
+
+- `face_recognition`
+- `dlib`
+- `OpenCV`
+- `Picamera2`
+
+Flujo:
 
 ```text
-registro.py
+Primer registro
+↓
+Captura de múltiples referencias faciales
+↓
+Generación de encodings
+↓
+Guardado de referencias
+
+Siguientes accesos
+↓
+Verificación facial en vivo
+↓
+Registro automático de entrada/salida
 ```
+
+Las referencias faciales se almacenan en:
+
+```text
+static/faces/
+```
+
+Cada profesor dispone de:
+
+```text
+encodings.pkl
+```
+
+con múltiples referencias faciales registradas.
 
 ---
 
@@ -157,9 +229,9 @@ modules/horarios/
 
 Responsabilidad:
 
-- Construcción de horarios semanales
-- Mezcla de horario fijo y guardias reales
-- Generación de tablas para la interfaz
+- Construcción de horarios
+- Mezcla de horario fijo y guardias
+- Generación de tablas para interfaz
 
 Archivo principal:
 
@@ -180,7 +252,8 @@ modules/utils/
 Responsabilidad:
 
 - Funciones auxiliares
-- Gestión de tiempo y horas lectivas
+- Gestión temporal
+- Horas lectivas
 - Utilidades comunes
 
 ---
@@ -191,21 +264,23 @@ El sistema utiliza SQLite como motor de persistencia.
 
 Ventajas:
 
-- Ligero
-- Fácil de desplegar
-- Sin servidor externo
-- Ideal para prototipos y proyectos académicos
+- ligero
+- simple
+- sin servidor externo
+- fácil despliegue
+- adecuado para Raspberry Pi
 
 ---
 
 # Interfaz web
 
-La interfaz se desarrolla utilizando:
+La interfaz utiliza:
 
 - Flask
 - Jinja2
 - HTML
 - CSS
+- JavaScript
 
 La aplicación utiliza renderizado server-side mediante plantillas.
 
@@ -213,9 +288,9 @@ La aplicación utiliza renderizado server-side mediante plantillas.
 
 # Modo test
 
-La aplicación incorpora un sistema de testing integrado.
+El sistema incorpora testing integrado mediante configuración.
 
-Desde `app.py` se pueden simular:
+Ejemplo:
 
 ```python
 MODO_TEST = True
@@ -223,7 +298,7 @@ FECHA_TEST = "2026-05-04"
 HORA_TEST = 1
 ```
 
-Esto permite probar:
+Permite simular:
 
 - horas pasadas
 - recreos
@@ -245,7 +320,7 @@ El sistema consulta el horario semanal planificado.
 
 ## 2. Presencia
 
-Se obtiene la presencia real registrada.
+Se obtiene la presencia real registrada mediante reconocimiento facial.
 
 ---
 
@@ -295,25 +370,33 @@ Esto evita mezclar:
 - lógica de negocio
 - acceso a datos
 - interfaz
+- reconocimiento facial
 
 ---
 
-## Protección backend + frontend
+## Validación backend + frontend
 
 Las restricciones importantes se validan tanto:
 
 - visualmente en la interfaz
 - como internamente en Flask
 
-Ejemplo:
+Ejemplos:
 
-- bloqueo de guardias pasadas
 - bloqueo fuera de horario
+- bloqueo de guardias pasadas
+- verificación facial obligatoria
 
 ---
 
 # Estado actual
 
-Actualmente el sistema es completamente funcional a nivel software.
+Actualmente el sistema integra:
 
-El siguiente paso del proyecto consiste en integrar hardware externo para automatizar el registro de presencia mediante Pi Camera.
+- gestión de presencia
+- generación de guardias
+- horarios
+- reconocimiento facial en vivo
+- integración con Raspberry Pi Camera
+
+El sistema es funcional tanto a nivel software como hardware.
