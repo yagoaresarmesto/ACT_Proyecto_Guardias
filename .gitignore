@@ -213,6 +213,9 @@ database/*.sqlite3
 # Archivos estáticos generados (opcional, si quieres subir solo CSS/JS fuente)
 media/
 
+# Referencias faciales locales
+static/faces/
+
 # Logs locales de desarrollo
 *.log
 
