@@ -1,9 +1,34 @@
-site_name: ACT Proyecto Guardias (Yago Ares Armesto)
+site_name: ACT Proyecto Guardias
+site_description: Documentación del sistema de gestión de guardias y presencia
+site_author: Yago Ares Armesto
+
 theme:
-  name: readthedocs
+  name: material
+  language: es
+  palette:
+    primary: blue
+    accent: light blue
+  features:
+    - navigation.tabs
+    - navigation.sections
+    - navigation.top
+    - toc.integrate
+    - search.highlight
 
 nav:
   - Inicio: index.md
   - Arquitectura: arquitectura.md
   - Base de datos: base_datos.md
   - Lógica del sistema: logica.md
+  - Módulo de presencia: presencia.md
+  - Módulo de guardias: guardias.md
+  - Módulo de horario: horario.md
+  - Raspberry Camera y hardware: raspberry_camera.md
+
+markdown_extensions:
+  - admonition
+  - toc:
+      permalink: true
+  - tables
+  - fenced_code
+  - codehilite
