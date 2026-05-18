@@ -1,9 +1,32 @@
-<!doctype html>
-<html>
-<head><title>Proyecto Guardias</title></head>
-<body>
-<h1>Test sistema de guardias</h1>
-<a href="/guardias">Ver guardias</a>
-<a href="/presencia">Control de presencia</a>
-</body>
-</html>
+{% extends "base.html" %}
+
+{% block content %}
+
+<div class="container dashboard-home">
+
+    <p class="home-subtitle">
+        Gestión de presencia, guardias, horarios.
+    </p>
+
+    <div class="home-grid">
+
+        <a href="/presencia" class="home-card">
+            <h2>Presencia</h2>
+            <p>Registrar entradas y salidas mediante reconocimiento facial.</p>
+        </a>
+
+        <a href="/guardias" class="home-card">
+            <h2>Guardias</h2>
+            <p>Consultar ausencias y asignar profesores disponibles.</p>
+        </a>
+
+        <a href="/horarios" class="home-card">
+            <h2>Horarios</h2>
+            <p>Visualizar el horario semanal de cada profesor.</p>
+        </a>
+
+    </div>
+
+</div>
+
+{% endblock %}

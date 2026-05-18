@@ -9,34 +9,51 @@ body {
 /* NAVBAR */
 
 .navbar {
-    background-color: white;
-    border-bottom: 1px solid #e0e0e0;
-    padding: 15px 0;
+    background: white;
+    border-bottom: 1px solid #e5e7eb;
+    padding: 12px 0;
 }
 
 .nav-container {
-    width: 80%;
-    margin: 0 auto;
+    width: 92%;
+    max-width: 1300px;
+    margin: auto;
+
     display: flex;
     justify-content: space-between;
     align-items: center;
 }
 
 .logo {
-    font-size: 18px;
-    font-weight: 500;
-    color: #333;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+
+    text-decoration: none;
+    color: #1e3a5f;
+    font-weight: 700;
+    font-size: 20px;
+}
+
+.logo img {
+    height: 54px;
+    width: auto;
+}
+
+.nav-links {
+    display: flex;
+    gap: 22px;
 }
 
 .nav-links a {
-    margin-left: 25px;
     text-decoration: none;
-    color: #555;
-    font-size: 15px;
+    color: #444;
+    font-weight: 500;
+    transition: 0.2s;
 }
 
 .nav-links a:hover {
-    color: #000;
+    color: #007bff;
 }
 
 /* CONTENEDOR */
@@ -108,10 +125,65 @@ select {
     border: 1px solid #ccc;
     min-width: 180px;
 }
+/*INDEX*/
 
-/* =============================
-   GUARDIAS
-============================= */
+.dashboard-home {
+    text-align: center;
+}
+
+.home-subtitle {
+    color: #666;
+    font-size: 16px;
+    margin-top: -10px;
+    margin-bottom: 30px;
+}
+
+.home-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 18px;
+    margin-top: 25px;
+}
+
+.home-card {
+    display: block;
+    padding: 24px 20px;
+    border-radius: 12px;
+    background: #f8fafc;
+    border: 1px solid #e3e6ea;
+    text-decoration: none;
+    color: #333;
+    transition: 0.2s ease;
+}
+
+.home-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 8px 18px rgba(0,0,0,0.08);
+    background: #eef6ff;
+    border-color: #b8dcff;
+}
+
+.home-card h2 {
+    margin: 0 0 10px 0;
+    color: #007bff;
+    font-size: 22px;
+}
+
+.home-card p {
+    margin: 0;
+    color: #666;
+    font-size: 14px;
+    line-height: 1.4;
+}
+
+@media (max-width: 800px) {
+    .home-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+
+/*GUARDIAS*/
 
 .hora-num {
     font-size: 13.5px;
@@ -173,9 +245,7 @@ select {
     opacity: 0.7;
 }
 
-/* =============================
-   PRESENCIA
-============================= */
+/*PRESENCIA*/
 
 .header-presencia {
     display: flex;
@@ -304,9 +374,7 @@ select {
     margin-left: 8px;
 }
 
-/* =============================
-   HORARIOS
-============================= */
+/*HORARIOS*/
 
 .horario-header {
     margin-bottom: 18px;
@@ -361,9 +429,7 @@ select {
     font-size: 13px;
 }
 
-/* =============================
-   MODAL
-============================= */
+/*MODAL*/
 
 .modal-overlay {
     position: fixed;
