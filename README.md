@@ -8,7 +8,7 @@ Aplicación Flask para gestionar presencia del profesorado, guardias y reconocim
 
 - Raspberry Pi 5
 - Raspberry Pi OS
-- Camera Module compatible, preferiblemente la module 3 ya que es la que he testeado
+- Camera Module compatible, preferiblemente Camera Module 3, que es la que se ha probado
 - Python 3
 - Git
 
@@ -25,11 +25,14 @@ cd ACT_Proyecto_Guardias
 
 ## 2. Instalar paquetes del sistema
 
-He decidido instalar estos 2 paquetes en el sistema ya que no pesan demasiado y es preferible que queden instalados en la máquina
+Se instalan por `apt` los paquetes relacionados con cámara, OpenCV y compilación de dependencias.
+
 ```bash
 sudo apt update
 sudo apt install -y python3-picamera2 python3-opencv cmake build-essential python3-dev
 ```
+
+`picamera2` y OpenCV se instalan en el sistema porque funcionan mejor así en Raspberry Pi.
 
 ---
 
@@ -46,11 +49,13 @@ source .venv/bin/activate
 
 ## 4. Instalar dependencias Python
 
+Con el entorno virtual activado, instalar Flask:
+
 ```bash
-pip install -r requirements.txt
+pip install flask
 ```
 
-Si `face_recognition` no está incluido en `requirements.txt`, instalarlo manualmente:
+Después instalar `face_recognition`:
 
 ```bash
 pip install face_recognition
@@ -58,9 +63,11 @@ pip install face_recognition
 
 ### Raspberry Pi con 4 GB de RAM
 
-En Raspberry Pi con 4 GB de RAM puede ser necesario crear swap temporal antes de instalar `face_recognition`.
+En Raspberry Pi con 4 GB de RAM, la instalación de `face_recognition` puede congelar el sistema porque compila `dlib`.
 
-Crear swap temporal:
+En ese caso, crear swap temporal antes de instalarlo.
+
+Crear swap temporal de 4 GB:
 
 ```bash
 sudo fallocate -l 4G /var/swap
@@ -76,7 +83,7 @@ swapon --show
 free -h
 ```
 
-Instalar limitando compilación paralela:
+Instalar `face_recognition` limitando la compilación paralela:
 
 ```bash
 export CMAKE_BUILD_PARALLEL_LEVEL=1
@@ -90,6 +97,8 @@ sudo swapoff /var/swap
 sudo rm /var/swap
 ```
 
+En Raspberry Pi 5 con 8 GB de RAM normalmente no es necesario crear swap adicional.
+
 ---
 
 ## 5. Comprobar cámara
@@ -100,7 +109,7 @@ Detectar cámaras disponibles:
 rpicam-hello --list-cameras
 ```
 
-Prueba rápida de captura:
+Prueba rápida de captura con preview de 5 segundos:
 
 ```bash
 rpicam-still -t 5000 -o foto_prueba.jpg
