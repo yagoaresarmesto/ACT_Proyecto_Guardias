@@ -1,0 +1,9 @@
+site_name: ACT Proyecto Guardias (Yago Ares Armesto)
+theme:
+  name: readthedocs
+
+nav:
+  - Inicio: index.md
+  - Arquitectura: arquitectura.md
+  - Base de datos: base_datos.md
+  - Lógica del sistema: logica.md
