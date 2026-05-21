@@ -7,7 +7,7 @@ El sistema de gestión de guardias se basa en comparar:
 
 A partir de esa comparación, el sistema detecta automáticamente incidencias y genera las guardias necesarias.
 
-Actualmente la presencia se obtiene mediante reconocimiento facial utilizando Raspberry Pi Camera.
+La presencia se obtiene mediante reconocimiento facial utilizando Raspberry Pi Camera.
 
 ---
 
@@ -346,19 +346,3 @@ Ejemplos:
 - evitar duplicados
 - impedir asignaciones inválidas
 - impedir registro sin validación facial
-
----
-
-# Estado actual
-
-Actualmente el sistema permite:
-
-- registrar presencia mediante reconocimiento facial
-- detectar ausencias
-- generar guardias automáticamente
-- asignar coberturas
-- consultar horarios
-- probar distintos escenarios mediante modo test
-- integración completa con Raspberry Pi Camera
-
-El sistema ya funciona integrado tanto a nivel software como hardware.
