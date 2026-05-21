@@ -224,9 +224,7 @@ def probar_asignacion(guardias):
 
 
 def main():
-    print("\n==============================")
     print("TEST CONTROLADO DEL PROYECTO")
-    print("==============================")
 
     limpiar_bd_completa()
 
@@ -240,7 +238,6 @@ def main():
     guardias = probar_generacion_guardias()
     probar_rankings(guardias)
 
-    # Actívalo solo si quieres probar asignación automática desde consola.
     # probar_asignacion(guardias)
 
     print("\n--- PROFESORES TRAS ASIGNACIÓN ---")

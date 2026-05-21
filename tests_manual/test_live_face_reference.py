@@ -51,7 +51,7 @@ def registrar_referencias():
     encodings_guardados = []
 
     print("Registro facial iniciado.")
-    print("Mira a c�mara y cambia un poco el �ngulo.")
+    print("Mira a cámara y cambia un poco el ángulo.")
     print("Capturando 5 referencias...")
 
     try:
@@ -66,7 +66,7 @@ def registrar_referencias():
 
                 print(f"Referencia {i+1}/5 guardada")
             else:
-                print(f"No se detect� cara en captura {i+1}")
+                print(f"No se detectó cara en captura {i+1}")
 
             time.sleep(1)
 
@@ -92,7 +92,7 @@ def verificar_en_vivo():
 
     picam2 = iniciar_camara()
 
-    print("Verificaci�n facial iniciada...")
+    print("Verificación facial iniciada...")
     print("Tienes 10 segundos para colocarte.")
 
     inicio = time.time()
@@ -105,7 +105,7 @@ def verificar_en_vivo():
             encodings = face_recognition.face_encodings(frame)
 
             if not encodings:
-                print("No se detect� cara")
+                print("No se detectó cara")
                 continue
 
             encoding_actual = encodings[0]
@@ -148,4 +148,4 @@ if __name__ == "__main__":
         verificar_en_vivo()
 
     else:
-        print("Modo no v�lido.")
+        print("Modo no válido.")

@@ -15,6 +15,7 @@ METODO_PRESENCIA = os.getenv("METODO_PRESENCIA", "facial")
 #Configuración para reconocimiento facial
 FACES_DIR = os.path.join(BASE_DIR, "static", "faces")
 
+#En principio no tocar
 NUM_REFERENCIAS_FACIALES = 7
 MAX_INTENTOS_REFERENCIA = 20
 TOLERANCIA_RECONOCIMIENTO = 0.5 #Estable 

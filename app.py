@@ -149,10 +149,7 @@ def asignar_guardia_manual():
 
     return redirect(url_for("vista_guardias", fecha=fecha))
 
-
-# =============================
 # PRESENCIA
-# =============================
 
 @app.route("/presencia", methods=["GET", "POST"])
 def vista_presencia():

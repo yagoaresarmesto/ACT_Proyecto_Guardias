@@ -45,14 +45,14 @@ def registrar_evento(profesor_id, fecha, hora):
 
     # Si ya tiene referencias, verificamos en vivo
     print(f"Profesor {profesor.nombre} con referencias faciales.")
-    print("Iniciando verificaci�n en vivo...")
+    print("Iniciando verificación en vivo...")
 
     verificado = verificar_profesor_en_vivo(
         profesor.rfid_uid
     )
 
     if not verificado:
-        print("Verificaci�n facial fallida.")
+        print("Verificación facial fallida.")
         return False
 
     eventos = obtener_eventos(fecha)
