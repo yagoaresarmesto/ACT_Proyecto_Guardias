@@ -55,7 +55,7 @@ Con el entorno virtual activado, instalar Flask:
 pip install flask
 ```
 
-Después instalar `face_recognition`:
+Después instalar `face_recognition`: suele tardar entre 10-20 minutos que compila dlib
 
 ```bash
 pip install face_recognition
