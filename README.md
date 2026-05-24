@@ -126,7 +126,7 @@ python -m modules.db.init_db
 Opcionalmente cargar datos de prueba:
 
 ```bash
-python test2.py
+python cargar_datos.py
 ```
 
 ---

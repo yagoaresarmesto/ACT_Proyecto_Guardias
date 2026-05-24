@@ -7,8 +7,8 @@ DB_PATH = os.path.join(BASE_DIR, "ies.db")
 
 # Configuración de presencia (modo test)
 MODO_TEST = True
-FECHA_TEST = "2026-05-04"
-HORA_TEST = 1 # Hora en formato 10h [1-10]
+FECHA_TEST = "2026-05-28"
+HORA_TEST = 3 # Hora en formato 10h [1-10]
 
 METODO_PRESENCIA = os.getenv("METODO_PRESENCIA", "facial")
 
